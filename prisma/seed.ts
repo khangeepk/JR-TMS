@@ -56,7 +56,6 @@ async function main() {
                 userId: tenantUser.id,
                 name: 'John Doe',
                 phone: '555-0199',
-                officeNumber: 1, // Assign to Office 1
                 leaseStart: new Date('2026-01-01'),
                 leaseEnd: new Date('2027-01-01'),
                 monthlyRent: 1500.00,
