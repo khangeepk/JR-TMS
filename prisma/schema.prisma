@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String          @id @default(cuid())
+  username      String          @unique
+  passwordHash  String
+  role          String          @default("TENANT") // "ADMIN" or "TENANT"
+  profile       TenantProfile?
+  notifications Notification[]
+}
+
+model TenantProfile {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  phone           String
+  leaseStart      DateTime
+  leaseEnd        DateTime
+  monthlyRent     Float
+  securityDeposit Float
+  offices         Office[]
+  payments        PaymentRecord[]
+}
+
+model Office {
+  id           String         @id @default(cuid())
+  officeNumber Int            @unique // 1 - 15
+  floor        Int
+  isOccupied   Boolean        @default(false)
+  tenantId     String?
+  tenant       TenantProfile? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+}
+
+model PaymentRecord {
+  id       String        @id @default(cuid())
+  tenantId String
+  tenant   TenantProfile @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type     String        // "RENT", "SECURITY", "WATER"
+  amount   Float
+  status   String        @default("UNPAID") // "PAID", "UNPAID"
+  dueDate  DateTime
+}
+
+model LedgerEntry {
+  id          String         @id @default(cuid())
+  date        DateTime       @default(now())
+  type        String         // "INCOME", "EXPENSE"
+  description String
+  amount      Float
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
