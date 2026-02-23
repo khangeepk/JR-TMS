@@ -12,6 +12,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "JR Arcade | Tenant Management",
   description: "Secure cross-platform Tenant Management System for JR Arcade",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "JR TMS",
+  },
+  themeColor: "#1e293b",
 };
 
 export default function RootLayout({
