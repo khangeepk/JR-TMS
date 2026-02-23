@@ -17,6 +17,11 @@ export function SignInPopup() {
     // If loading session, don't show the modal to prevent flicker
     if (status === "loading") return null;
 
+    // Skip popup on diagnostic / api routes
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/api/")) {
+        return null;
+    }
+
     // The dialog is open if the user is unauthenticated
     const isOpen = status === "unauthenticated";
 
