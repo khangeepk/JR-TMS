@@ -65,4 +65,5 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
+    secret: process.env.NEXTAUTH_SECRET || "jr-arcade-super-secret-key-12345",
 };
