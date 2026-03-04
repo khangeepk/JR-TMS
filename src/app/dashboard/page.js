@@ -18,8 +18,12 @@ export default async function DashboardPage() {
       </form>
       <table border="1" width="100%">
         <thead>
-          <tr><th>Name</th><th>Office</th><th>Rent</th></tr>
-        </thead>
+  <tr>
+    <th>Name</th>
+    <th>Office No</th>
+    <th>Monthly Rent</th>
+  </tr>
+</thead>
         <tbody>
           {tenants.map((t) => (
             <tr key={t.id}>
