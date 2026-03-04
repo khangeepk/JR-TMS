@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db } from '@vercel/postgres';
 
 export async function GET(request) {
-  // 1. Security Check
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', { status: 401 });
   }
 
   try {
-    // 2. Prisma se TenantProfile ka data uthana
-    const unpaidTenants = await prisma.tenantProfile.findMany();
+    const client = await db.connect();
 
-    // 3. WhatsApp bhejne ka loop
+    // Aap ke asali table 'TenantProfile' se data uthana
+    const { rows: unpaidTenants } = await client.sql`
+      SELECT name, phone, "monthlyRent" as amount
+      FROM "TenantProfile"
+    `;
+
     for (const tenant of unpaidTenants) {
-      const message = `Assalam-o-Alaikum ${tenant.name}! JR Arcade Reminder: Aapka Rent Rs. ${tenant.monthlyRent} pending hai. Shukriya!`;
+      const message = `Assalam-o-Alaikum ${tenant.name}! JR Arcade Reminder: Aapka Rent Rs. ${tenant.amount} pending hai. Meherbani farmaker jald ada karden.`;
 
       await fetch(`https://api.green-api.com/waInstance${process.env.GREEN_ID}/sendMessage/${process.env.GREEN_TOKEN}`, {
         method: 'POST',
@@ -28,11 +29,9 @@ export async function GET(request) {
       });
     }
 
-    return NextResponse.json({ success: true, message: `${unpaidTenants.length} Messages Sent!` });
+    return NextResponse.json({ success: true, message: `${unpaidTenants.length} Reminders Sent!` });
 
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message });
-  } finally {
-    await prisma.$disconnect();
   }
 }
