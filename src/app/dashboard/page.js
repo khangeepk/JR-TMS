@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { addTenant } from './actions' // Hum ne action ko alag file se bulaya
+import { addTenant } from './actions'
 
 const prisma = new PrismaClient()
 
@@ -27,7 +27,7 @@ export default async function DashboardPage() {
         <thead style={{ backgroundColor: '#f8f9fa' }}>
           <tr>
             <th style={{padding: '10px'}}>Name</th>
-            <th style={{padding: '10px'}}>Office</th>
+            <th style={{padding: '10px'}}>Office No</th>
             <th style={{padding: '10px'}}>Monthly Rent</th>
           </tr>
         </thead>
