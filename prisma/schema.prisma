@@ -9,21 +9,57 @@ datasource db {
 }
 
 model TenantProfile {
-  id          Int             @id @default(autoincrement())
-  name        String
-  phone       String
-  monthlyRent Float
-  office      String
-  startDate   DateTime        @default(now())
-  status      String          @default("unpaid")
-  payments    PaymentRecord[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  phone                String
+  monthlyRent          Float
+  waterCharges         Float                  @default(0)
+  offices              String[]               @default([])
+  isShared             Boolean                @default(false)
+  startDate            DateTime               @default(now())
+  rentStatus           String                 @default("unpaid")
+  waterStatus          String                 @default("unpaid")
+  // Security Deposit Fields
+  totalSecurityAmount  Float                  @default(0)
+  securityPaidSoFar    Float                  @default(0)
+  securityStatus       String                 @default("Pending") // "Pending", "Partial", "Fully Paid"
+  payments             PaymentRecord[]
+  securityInstallments SecurityInstallment[]
 }
 
 model PaymentRecord {
-  id       Int           @id @default(autoincrement())
-  amount   Float
-  date     DateTime      @default(now())
-  month    String
-  tenantId Int
-  tenant   TenantProfile @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id        Int           @id @default(autoincrement())
+  receiptId String        @unique @default(cuid())
+  amount    Float
+  type      String        @default("RENT") // "RENT", "WATER", "SECURITY"
+  date      DateTime      @default(now())
+  month     String
+  tenantId  Int
+  tenant    TenantProfile @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model SecurityInstallment {
+  id          Int           @id @default(autoincrement())
+  receiptId   String        @unique @default(cuid())
+  amount      Float
+  paymentDate DateTime      @default(now())
+  tenantId    Int
+  tenant      TenantProfile @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  category    String   // "Utility Bills" | "Maintenance & Repairing" | "Misc Charges"
+  description String
+  amount      Float
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model PropertyInfo {
+  id           Int    @id @default(1)
+  propertyName String @default("JR Arcade")
+  phone        String @default("")
+  email        String @default("")
+  address      String @default("")
 }

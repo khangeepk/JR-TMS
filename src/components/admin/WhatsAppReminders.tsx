@@ -62,13 +62,13 @@ export default function WhatsAppReminders() {
 
     if (loading) {
         return (
-            <Card className="border-none shadow-sm shadow-slate-200">
+            <Card className="border-neutral-200 dark:border-neutral-800 shadow-sm dark:shadow-none bg-white dark:bg-neutral-900 overflow-hidden">
                 <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-green-500" /> WhatsApp Reminders
+                    <CardTitle className="text-lg flex items-center gap-2 text-neutral-900 dark:text-white font-bold">
+                        <MessageCircle className="h-5 w-5 text-emerald-500" /> WhatsApp Reminders
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="h-24 flex items-center justify-center text-slate-500">
+                <CardContent className="h-24 flex items-center justify-center text-neutral-500 dark:text-neutral-400 font-medium italic">
                     Scanning Ledger...
                 </CardContent>
             </Card>
@@ -77,13 +77,13 @@ export default function WhatsAppReminders() {
 
     if (!data || data.unpaidTenants.length === 0) {
         return (
-            <Card className="border-none shadow-sm shadow-emerald-100 bg-emerald-50/50">
+            <Card className="border-emerald-200 dark:border-emerald-500/20 shadow-sm dark:shadow-none bg-emerald-50/50 dark:bg-emerald-500/5 overflow-hidden">
                 <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2 text-emerald-800">
-                        <CheckCircle2 className="h-5 w-5 text-emerald-600" /> All Caught Up!
+                    <CardTitle className="text-lg flex items-center gap-2 text-emerald-800 dark:text-emerald-400 font-bold">
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-500" /> All Caught Up!
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="text-emerald-700">
+                <CardContent className="text-emerald-700 dark:text-emerald-300 font-medium">
                     Everybody has paid their rent and water charges for {data?.month}. No WhatsApp reminders needed!
                 </CardContent>
             </Card>
@@ -91,32 +91,34 @@ export default function WhatsAppReminders() {
     }
 
     return (
-        <Card className="border-none shadow-sm shadow-slate-200">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
+        <Card className="border-neutral-200 dark:border-neutral-800 shadow-sm dark:shadow-none bg-white dark:bg-neutral-900 overflow-hidden">
+            <CardHeader className="pb-3 px-6 pt-6">
+                <CardTitle className="text-lg flex items-center gap-2 text-neutral-900 dark:text-white font-bold">
                     {data.isAlertDay ? (
-                        <AlertCircle className="h-5 w-5 text-red-500" />
+                        <AlertCircle className="h-5 w-5 text-rose-500" />
                     ) : (
-                        <MessageCircle className="h-5 w-5 text-green-500" />
+                        <MessageCircle className="h-5 w-5 text-emerald-500" />
                     )}
                     WhatsApp Reminders
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-neutral-500 dark:text-neutral-400 font-medium">
                     {data.unpaidTenants.length} tenant(s) have not cleared their dues for {data.month}.
                     {data.isAlertDay ? " (Alert: Past due date!)" : " (Optional early reminder)"}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2">
+            <CardContent className="px-6 pb-6">
+                <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
                     {data.unpaidTenants.map((tenant, idx) => (
-                        <div key={idx} className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+                        <div key={idx} className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between p-4 border border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950/50 rounded-xl transition-colors hover:border-neutral-200 dark:hover:border-neutral-700">
                             <div>
-                                <div className="font-semibold text-slate-900">{tenant.tenantName}</div>
-                                <div className="text-sm text-slate-500">Office(s) {tenant.unpaidOffices.join(", ")} | {tenant.phone}</div>
+                                <div className="font-bold text-neutral-900 dark:text-white">{tenant.tenantName}</div>
+                                <div className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 mt-1 uppercase tracking-widest">
+                                    Offices: {tenant.unpaidOffices.join(", ")} <span className="mx-2 text-neutral-300 dark:text-neutral-700">|</span> {tenant.phone}
+                                </div>
                             </div>
                             <Button
                                 onClick={() => handleSendReminder(tenant)}
-                                className="bg-[#25D366] hover:bg-[#128C7E] text-white flex gap-2 w-full sm:w-auto"
+                                className="bg-[#25D366] hover:bg-[#128C7E] active:scale-[0.98] text-white font-bold flex gap-2 w-full sm:w-auto rounded-xl shadow-lg shadow-[#25D366]/20 transition-all uppercase tracking-widest text-[10px] py-5"
                             >
                                 <MessageCircle className="h-4 w-4" /> Send Reminder
                             </Button>
