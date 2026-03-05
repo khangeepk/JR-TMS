@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { Settings, Building2, Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react'
 import { savePropertyInfo } from '@/app/dashboard/actions'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
     // Fetch or create default PropertyInfo (singleton id=1)

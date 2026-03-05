@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import ExpensesClient from '@/components/ExpensesClient'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
 export default async function ExpensesPage() {
     const expenses = await prisma.expense.findMany({

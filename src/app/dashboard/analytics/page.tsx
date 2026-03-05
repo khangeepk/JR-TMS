@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { BarChart3, TrendingUp, Users, CreditCard, Droplets } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const prisma = new PrismaClient()
+export const dynamic = 'force-dynamic'
 
 export default async function AnalyticsPage() {
     const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })

@@ -1,13 +1,11 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { sendWhatsAppMessage } from '@/lib/whatsapp'
 import { generateExcelBase64 } from '@/lib/excel'
 import { uploadReport } from '@/lib/supabase-storage'
-
-const prisma = new PrismaClient()
 
 // Zod validation schemas
 const AddTenantSchema = z.object({
@@ -91,6 +89,9 @@ export async function addTenant(formData: FormData) {
     })
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/tenants')
+    revalidatePath('/dashboard/ledger')
+    revalidatePath('/dashboard/analytics')
   } catch (error: any) {
     throw new Error(error.message || "Failed to add tenant")
   }
@@ -147,6 +148,9 @@ export async function updateTenant(formData: FormData) {
     })
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/tenants')
+    revalidatePath('/dashboard/ledger')
+    revalidatePath('/dashboard/analytics')
   } catch (error: any) {
     throw new Error(error.message || "Failed to update tenant")
   }
@@ -159,6 +163,9 @@ export async function deleteTenant(tenantId: number) {
       where: { id: tenantId }
     })
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/tenants')
+    revalidatePath('/dashboard/ledger')
+    revalidatePath('/dashboard/analytics')
   } catch (error: any) {
     throw new Error("Failed to delete tenant: " + error.message)
   }
