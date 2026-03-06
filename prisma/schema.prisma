@@ -63,3 +63,15 @@ model PropertyInfo {
   email        String @default("")
   address      String @default("")
 }
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  name         String
+  isAdmin      Boolean  @default(false)
+  canEdit      Boolean  @default(false)
+  canAdd       Boolean  @default(false)
+  canDelete    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}

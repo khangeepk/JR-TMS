@@ -322,20 +322,23 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
 
                                                 <td className="px-4 py-4 whitespace-nowrap text-right">
                                                     <div className="flex items-center justify-end gap-2">
-                                                        {!isPaid && (
+                                                        {!rentPaid && (
                                                             <button
                                                                 onClick={() => startTransition(async () => {
-                                                                    if (!rentPaid) {
-                                                                        addOptimisticPayment({ tenantId: t.id, amount: t.monthlyRent, month: currentMonth, type: 'RENT', receiptId: 'opt' })
-                                                                        await markAsPaid(t.id, t.monthlyRent, 'RENT')
-                                                                    }
-                                                                    if (!waterPaid) {
-                                                                        addOptimisticPayment({ tenantId: t.id, amount: t.waterCharges, month: currentMonth, type: 'WATER', receiptId: 'opt2' })
-                                                                        await markAsPaid(t.id, t.waterCharges, 'WATER')
-                                                                    }
+                                                                    addOptimisticPayment({ tenantId: t.id, amount: t.monthlyRent, month: currentMonth, type: 'RENT', receiptId: 'opt-r-' + t.id })
+                                                                    await markAsPaid(t.id, t.monthlyRent, 'RENT')
                                                                 })}
-                                                                className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-all uppercase"
-                                                            >Pay</button>
+                                                                className="px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-bold rounded-lg hover:bg-emerald-600 transition-all uppercase whitespace-nowrap"
+                                                            >Pay Rent</button>
+                                                        )}
+                                                        {!waterPaid && (
+                                                            <button
+                                                                onClick={() => startTransition(async () => {
+                                                                    addOptimisticPayment({ tenantId: t.id, amount: t.waterCharges, month: currentMonth, type: 'WATER', receiptId: 'opt-w-' + t.id })
+                                                                    await markAsPaid(t.id, t.waterCharges, 'WATER')
+                                                                })}
+                                                                className="px-3 py-1.5 bg-blue-500 text-white text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-all uppercase whitespace-nowrap"
+                                                            >Pay Water</button>
                                                         )}
                                                         <WhatsAppActionButton tenantId={t.id} amount={t.monthlyRent + t.waterCharges} month={currentMonth} phone={t.phone} isPaid={isPaid} />
                                                         <button className="p-1 text-slate-400 hover:text-slate-600">

@@ -4,18 +4,31 @@ declare module "next-auth" {
     interface Session {
         user: {
             id: string;
-            role: string;
+            username: string;
+            isAdmin: boolean;
+            canEdit: boolean;
+            canAdd: boolean;
+            canDelete: boolean;
         } & DefaultSession["user"];
     }
 
     interface User {
-        role: string;
+        id: string;
+        username: string;
+        isAdmin: boolean;
+        canEdit: boolean;
+        canAdd: boolean;
+        canDelete: boolean;
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
         id: string;
-        role: string;
+        username: string;
+        isAdmin: boolean;
+        canEdit: boolean;
+        canAdd: boolean;
+        canDelete: boolean;
     }
 }

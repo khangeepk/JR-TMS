@@ -6,6 +6,9 @@ import { z } from 'zod'
 import { sendWhatsAppMessage } from '@/lib/whatsapp'
 import { generateExcelBase64 } from '@/lib/excel'
 import { uploadReport } from '@/lib/supabase-storage'
+import bcrypt from 'bcryptjs'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 // Zod validation schemas
 const AddTenantSchema = z.object({
@@ -525,5 +528,71 @@ export async function savePropertyInfo(formData: FormData) {
     revalidatePath('/dashboard/settings')
   } catch (error: any) {
     throw new Error(error.message || 'Failed to save settings')
+  }
+}
+
+// ─── User Management Actions (Admin Only) ───────────────────────────────────
+
+export async function createUser(formData: FormData) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      throw new Error("Unauthorized: Only administrators can create users.")
+    }
+
+    const username = formData.get('username') as string
+    const password = formData.get('password') as string
+    const name = formData.get('name') as string
+    const isAdmin = formData.get('isAdmin') === 'on'
+    const canEdit = formData.get('canEdit') === 'on'
+    const canAdd = formData.get('canAdd') === 'on'
+    const canDelete = formData.get('canDelete') === 'on'
+
+    if (!username || !password || !name) {
+      throw new Error("Missing required fields")
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { username } })
+    if (existingUser) {
+      throw new Error("Username already taken")
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10)
+
+    await prisma.user.create({
+      data: {
+        username,
+        passwordHash,
+        name,
+        isAdmin,
+        canEdit,
+        canAdd,
+        canDelete
+      }
+    })
+
+    revalidatePath('/dashboard/settings')
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to create user')
+  }
+}
+
+export async function deleteUser(id: number) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      throw new Error("Unauthorized: Only administrators can delete users.")
+    }
+
+    // Prevent deleting the main admin account as a safety measure
+    const target = await prisma.user.findUnique({ where: { id } })
+    if (target?.username === 'admin') {
+      throw new Error("Cannot delete the master admin account.")
+    }
+
+    await prisma.user.delete({ where: { id } })
+    revalidatePath('/dashboard/settings')
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to delete user')
   }
 }

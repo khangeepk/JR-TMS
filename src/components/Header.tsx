@@ -1,6 +1,14 @@
-import { Search, Bell } from 'lucide-react'
+import { Search, Bell, LogOut } from 'lucide-react'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import LogoutButton from './LogoutButton'
 
-export default function Header() {
+export default async function Header() {
+    const session = await getServerSession(authOptions)
+
+    // Get initials. Default to "AD" for admin if name is missing
+    const username = session?.user?.name || 'Admin'
+    const initials = username.substring(0, 2).toUpperCase()
     return (
         <header className="flex items-center justify-between h-20 px-4 md:px-8 bg-[#F1F5F9]">
             {/* Left side: Page Title (Dynamic mapping conceptually, handled in layout usually, but we'll place it here or keep it simple) */}
@@ -31,14 +39,11 @@ export default function Header() {
 
                 {/* Profile Badges */}
                 <div className="flex items-center gap-2 bg-white p-1 rounded-full shadow-sm border border-neutral-100">
-                    <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-xs">
-                        SK
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                        {initials}
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                        SK
-                    </div>
-                    <div className="pr-2">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><path d="m6 9 6 6 6-6" /></svg>
+                    <div className="pr-2 flex items-center">
+                        <LogoutButton />
                     </div>
                 </div>
             </div>
