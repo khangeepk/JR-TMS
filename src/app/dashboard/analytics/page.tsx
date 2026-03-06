@@ -14,28 +14,37 @@ export default async function AnalyticsPage() {
         }
     })
 
-    const currentMonthPayments = tenants.flatMap(t => t.payments.filter(p => p.month === currentMonth))
+    const currentMonthPayments = tenants.flatMap((t: any) => t.payments.filter((p: any) => p.month === currentMonth))
 
-    const totalRentExpected = tenants.reduce((acc, t) => acc + t.monthlyRent, 0)
-    const totalWaterExpected = tenants.reduce((acc, t) => acc + t.waterCharges, 0)
-    const totalRentReceived = currentMonthPayments.filter(p => p.type === 'RENT').reduce((acc, p) => acc + p.amount, 0)
-    // Water Received should be sum of current waterCharges for tenants who paid water this month
-    const totalWaterReceived = tenants.reduce((acc, t) => {
-        const waterPaid = currentMonthPayments.some(p => p.tenantId === t.id && p.type === 'WATER')
-        return acc + (waterPaid ? t.waterCharges : 0)
+    const totalRentExpected = tenants.reduce((acc: number, t: any) => acc + (t.monthlyRent || 0), 0)
+    const totalWaterExpected = tenants.reduce((acc: number, t: any) => acc + (t.waterCharges || 0), 0)
+    const totalRentReceived = currentMonthPayments.filter((p: any) => p.type === 'RENT').reduce((acc: number, p: any) => acc + (p.amount || 0), 0)
+
+    // Fix: sum actul payment amount for WATER or fallback to waterCharges
+    const totalWaterReceived = tenants.reduce((acc: number, t: any) => {
+        const waterPayment = t.payments.find((p: any) => p.month === currentMonth && p.type === 'WATER');
+        if (waterPayment) {
+            return acc + (waterPayment.amount || t.waterCharges || 0);
+        }
+        return acc;
     }, 0)
-    const totalSecurityCollected = tenants.reduce((acc, t) => acc + t.securityPaidSoFar, 0)
-    // Security pending should only be calculated if totalSecurityAmount > 0 and it shouldn't be negative
-    const totalSecurityPending = tenants.reduce((acc, t) => {
-        if (t.totalSecurityAmount <= 0) return acc;
-        const pending = t.totalSecurityAmount - t.securityPaidSoFar;
+
+    const totalSecurityCollected = tenants.reduce((acc: number, t: any) => acc + (t.securityPaidSoFar || 0), 0)
+
+    // Fix: more robust check for pending security
+    const totalSecurityPending = tenants.reduce((acc: number, t: any) => {
+        const totalAmount = t.totalSecurityAmount || 0;
+        const paidAmount = t.securityPaidSoFar || 0;
+        if (totalAmount <= 0) return acc;
+
+        const pending = totalAmount - paidAmount;
         return acc + (pending > 0 ? pending : 0);
     }, 0)
 
     const rentRecovery = totalRentExpected > 0 ? Math.round((totalRentReceived / totalRentExpected) * 100) : 0
     const waterRecovery = totalWaterExpected > 0 ? Math.round((totalWaterReceived / totalWaterExpected) * 100) : 0
 
-    const topPayersByRent = [...tenants].sort((a, b) => b.monthlyRent - a.monthlyRent).slice(0, 5)
+    const topPayersByRent = [...tenants].sort((a: any, b: any) => (b.monthlyRent || 0) - (a.monthlyRent || 0)).slice(0, 5)
 
     return (
         <div className="space-y-6">
@@ -57,31 +66,31 @@ export default async function AnalyticsPage() {
                     { label: 'Security Collected', value: `Rs. ${totalSecurityCollected.toLocaleString()}`, icon: CreditCard, color: 'bg-amber-600' },
                     { label: 'Security Pending', value: `Rs. ${totalSecurityPending.toLocaleString()}`, icon: CreditCard, color: 'bg-rose-600' },
                 ].map(card => (
-                    <div key={card.label} className="glass-card rounded-2xl p-5 flex items-center gap-4">
-                        <div className={cn('p-3 rounded-xl shadow-lg', card.color)}>
+                    <div key={card.label} className="bg-white premium-shadow rounded-2xl p-5 flex items-center gap-4">
+                        <div className={cn('p-3 rounded-xl shadow-md', card.color)}>
                             <card.icon size={20} className="text-white" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">{card.label}</p>
-                            <p className="text-xl font-bold mt-0.5">{card.value}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">{card.label}</p>
+                            <p className="text-xl font-bold mt-0.5 text-slate-800">{card.value}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* Recovery Bars */}
-            <div className="glass-card rounded-2xl p-6 space-y-5">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Recovery Rate</h2>
+            <div className="bg-white premium-shadow rounded-2xl p-6 space-y-5">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">Recovery Rate</h2>
                 {[
                     { label: 'Rent', percent: rentRecovery, color: 'bg-emerald-500' },
                     { label: 'Water', percent: waterRecovery, color: 'bg-blue-500' },
                 ].map(bar => (
                     <div key={bar.label} className="space-y-2">
-                        <div className="flex justify-between text-xs font-bold">
+                        <div className="flex justify-between text-xs font-bold text-slate-600">
                             <span>{bar.label}</span>
                             <span className="text-emerald-500">{bar.percent}%</span>
                         </div>
-                        <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-2.5">
+                        <div className="w-full bg-neutral-100 rounded-full h-2.5">
                             <div
                                 className={cn('h-2.5 rounded-full transition-all', bar.color)}
                                 style={{ width: `${bar.percent}%` }}
@@ -92,19 +101,19 @@ export default async function AnalyticsPage() {
             </div>
 
             {/* Top 5 Tenants by Rent */}
-            <div className="glass-card rounded-2xl p-6">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Top Tenants by Rent</h2>
+            <div className="bg-white premium-shadow rounded-2xl p-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800 mb-4">Top Tenants by Rent</h2>
                 <div className="space-y-3">
-                    {topPayersByRent.map((t, i) => (
-                        <div key={t.id} className="flex items-center justify-between">
+                    {topPayersByRent.map((t: any, i: number) => (
+                        <div key={t.id} className="flex items-center justify-between p-2 hover:bg-neutral-50 rounded-xl transition-colors">
                             <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black text-muted-foreground w-5">#{i + 1}</span>
+                                <span className="text-[10px] font-black text-slate-400 w-5">#{i + 1}</span>
                                 <div>
-                                    <p className="text-sm font-bold">{t.name}</p>
-                                    <p className="text-[10px] text-muted-foreground">{t.offices.join(', ')}</p>
+                                    <p className="text-sm font-bold text-slate-800">{t.name}</p>
+                                    <p className="text-[10px] text-slate-400">{t.offices?.join(', ') || ''}</p>
                                 </div>
                             </div>
-                            <span className="text-sm font-bold text-emerald-600">Rs. {t.monthlyRent.toLocaleString()}</span>
+                            <span className="text-sm font-bold text-emerald-600">Rs. {(t.monthlyRent || 0).toLocaleString()}</span>
                         </div>
                     ))}
                 </div>

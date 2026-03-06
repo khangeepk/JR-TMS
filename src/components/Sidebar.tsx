@@ -35,13 +35,14 @@ export default function Sidebar() {
         <motion.aside
             initial={false}
             animate={{ width: isCollapsed ? 80 : 260 }}
-            className="relative flex flex-col h-screen bg-card border-r border-border transition-all duration-300 ease-in-out glass"
+            className="relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-20"
         >
             {/* Brand Header */}
             <div className="flex items-center h-20 px-6 overflow-hidden">
-                <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                        <Building2 size={24} />
+                <div className="flex items-center gap-3 w-full justify-center md:justify-start">
+                    <div className="flex-shrink-0 flex items-center justify-center text-emerald-500">
+                        {/* Custom JR typography logo based on mockup */}
+                        <span className="text-3xl font-black tracking-tighter">JR</span>
                     </div>
                     <AnimatePresence>
                         {!isCollapsed && (
@@ -49,9 +50,9 @@ export default function Sidebar() {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
-                                className="text-lg font-bold tracking-tight whitespace-nowrap"
+                                className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
                             >
-                                JR Arcade <span className="text-emerald-500">TMS</span>
+                                <span className="opacity-0 w-0 hidden md:inline-block">JR</span> Arcade <span className="text-emerald-500 font-medium">TMS</span>
                             </motion.span>
                         )}
                     </AnimatePresence>
@@ -66,13 +67,13 @@ export default function Sidebar() {
                         <Link key={item.label} href={item.href}>
                             <div
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative",
+                                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative my-1",
                                     isActive
-                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                        : "text-muted-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-foreground"
+                                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
                                 )}
                             >
-                                <item.icon size={22} className={cn("flex-shrink-0", isActive ? "text-emerald-600 dark:text-emerald-400" : "group-hover:scale-110 transition-transform")} />
+                                <item.icon size={20} className={cn("flex-shrink-0", isActive ? "text-white" : "group-hover:text-emerald-400 transition-colors")} />
                                 {!isCollapsed && (
                                     <motion.span
                                         initial={{ opacity: 0 }}
@@ -82,12 +83,6 @@ export default function Sidebar() {
                                         {item.label}
                                     </motion.span>
                                 )}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="active-pill"
-                                        className="absolute left-0 w-1 h-6 bg-emerald-500 rounded-r-full"
-                                    />
-                                )}
                             </div>
                         </Link>
                     )
@@ -95,16 +90,16 @@ export default function Sidebar() {
             </nav>
 
             {/* Footer / Toggle */}
-            <div className="p-3 border-t border-border">
+            <div className="p-4 border-t border-slate-700/50">
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-muted-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all font-medium text-sm"
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all font-medium text-sm"
                 >
-                    {isCollapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
+                    {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                     {!isCollapsed && <span>Collapse Menu</span>}
                 </button>
-                <button className="flex items-center gap-3 w-full px-3 py-3 mt-1 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-medium text-sm">
-                    <LogOut size={22} />
+                <button className="flex items-center gap-3 w-full px-4 py-3 mt-1 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-medium text-sm">
+                    <LogOut size={20} />
                     {!isCollapsed && <span>Logout</span>}
                 </button>
             </div>

@@ -21,18 +21,18 @@ export default async function LedgerPage() {
 
     // ── Income calculations ──────────────────────────────────────────────────
     // Expected = what ALL tenants SHOULD pay
-    const totalRentExpected = tenants.reduce((acc: number, t) => acc + t.monthlyRent, 0)
-    const totalWaterExpected = tenants.reduce((acc: number, t) => acc + t.waterCharges, 0)
+    const totalRentExpected = tenants.reduce((acc: number, t: any) => acc + t.monthlyRent, 0)
+    const totalWaterExpected = tenants.reduce((acc: number, t: any) => acc + t.waterCharges, 0)
 
     // Received = only tenants whose PaymentRecord (type=RENT/WATER) exists this month
-    const totalRentReceived = tenants.reduce((acc: number, t) => {
-        const p = t.payments.find(p => p.type === 'RENT')
+    const totalRentReceived = tenants.reduce((acc: number, t: any) => {
+        const p = t.payments.find((p: any) => p.type === 'RENT')
         // Use the stored payment amount (equals t.monthlyRent at time of payment)
         return acc + (p ? p.amount : 0)
     }, 0)
 
-    const totalWaterReceived = tenants.reduce((acc: number, t) => {
-        const p = t.payments.find(p => p.type === 'WATER')
+    const totalWaterReceived = tenants.reduce((acc: number, t: any) => {
+        const p = t.payments.find((p: any) => p.type === 'WATER')
         // Use tenant's current waterCharges instead of the historical payment amount
         return acc + (p ? t.waterCharges : 0)
     }, 0)
@@ -54,35 +54,35 @@ export default async function LedgerPage() {
 
             {/* ── Grand Financial Summary ── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="glass-card rounded-2xl p-6 border-l-4 border-emerald-500">
+                <div className="bg-white premium-shadow rounded-2xl p-6 border-l-4 border-emerald-500">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Total Income</p>
-                        <div className="p-2 bg-emerald-500/10 rounded-xl"><TrendingUp size={18} className="text-emerald-500" /></div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Total Income</p>
+                        <div className="p-2 bg-emerald-50 rounded-xl"><TrendingUp size={18} className="text-emerald-500" /></div>
                     </div>
                     <p className="text-3xl font-black text-emerald-600">Rs. {totalIncome.toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground mt-2">Rent Rs.{totalRentReceived.toLocaleString()} + Water Rs.{totalWaterReceived.toLocaleString()}</p>
+                    <p className="text-[10px] text-slate-400 mt-2">Rent Rs.{totalRentReceived.toLocaleString()} + Water Rs.{totalWaterReceived.toLocaleString()}</p>
                 </div>
 
-                <div className="glass-card rounded-2xl p-6 border-l-4 border-rose-500">
+                <div className="bg-white premium-shadow rounded-2xl p-6 border-l-4 border-rose-500">
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Total Expenses</p>
-                        <div className="p-2 bg-rose-500/10 rounded-xl"><TrendingDown size={18} className="text-rose-500" /></div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Total Expenses</p>
+                        <div className="p-2 bg-rose-50 rounded-xl"><TrendingDown size={18} className="text-rose-500" /></div>
                     </div>
                     <p className="text-3xl font-black text-rose-500">Rs. {totalExpenses.toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground mt-2">{expenses.length} expense record(s)</p>
+                    <p className="text-[10px] text-slate-400 mt-2">{expenses.length} expense record(s)</p>
                 </div>
 
-                <div className={cn("glass-card rounded-2xl p-6 border-l-4", isProfit ? "border-blue-500" : "border-rose-600")}>
+                <div className={cn("bg-white premium-shadow rounded-2xl p-6 border-l-4", isProfit ? "border-blue-500" : "border-rose-600")}>
                     <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{isProfit ? 'Net Profit' : 'Net Loss'}</p>
-                        <div className={cn("p-2 rounded-xl", isProfit ? "bg-blue-500/10" : "bg-rose-600/10")}>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{isProfit ? 'Net Profit' : 'Net Loss'}</p>
+                        <div className={cn("p-2 rounded-xl", isProfit ? "bg-blue-50" : "bg-rose-50")}>
                             {isProfit ? <TrendingUp size={18} className="text-blue-500" /> : <TrendingDown size={18} className="text-rose-600" />}
                         </div>
                     </div>
                     <p className={cn("text-3xl font-black", isProfit ? "text-blue-600" : "text-rose-600")}>
                         Rs. {Math.abs(netProfit).toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-muted-foreground mt-2">Income − Expenses</p>
+                    <p className="text-[10px] text-slate-400 mt-2">Income − Expenses</p>
                 </div>
             </div>
 
@@ -94,58 +94,58 @@ export default async function LedgerPage() {
                     { label: 'Water Expected', value: totalWaterExpected, color: 'text-violet-500' },
                     { label: 'Water Received', value: totalWaterReceived, color: 'text-emerald-500' },
                 ].map(card => (
-                    <div key={card.label} className="glass-card rounded-2xl p-5">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">{card.label}</p>
+                    <div key={card.label} className="bg-white premium-shadow rounded-2xl p-5">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">{card.label}</p>
                         <p className={cn("text-xl font-bold", card.color)}>Rs. {card.value.toLocaleString()}</p>
                     </div>
                 ))}
             </div>
 
             {/* ── Tenant Ledger Table ── */}
-            <div className="glass-card rounded-2xl overflow-hidden">
-                <div className="px-6 py-5 border-b border-border">
-                    <h2 className="text-sm font-bold uppercase tracking-wider">Tenant Income Breakdown — {currentMonth}</h2>
+            <div className="bg-white premium-shadow rounded-[2rem] overflow-hidden text-slate-800">
+                <div className="px-6 py-5 border-b border-neutral-100">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">Tenant Income Breakdown — {currentMonth}</h2>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[700px]">
+                <div className="overflow-x-auto px-4 pb-4">
+                    <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-neutral-50/50 dark:bg-neutral-950/20">
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Tenant</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Offices</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Rent</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center">Rent Status</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Water</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center">Water Status</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Collected</th>
+                            <tr className="border-b border-neutral-100">
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tenant</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Office</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Rent</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Water</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Collected</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
-                            {tenants.map((t, index) => {
-                                const rentPayment = t.payments.find(p => p.type === 'RENT')
-                                const waterPayment = t.payments.find(p => p.type === 'WATER')
+                        <tbody className="divide-y divide-neutral-50">
+                            {tenants.map((t: any, index: number) => {
+                                const rentPayment = t.payments.find((p: any) => p.type === 'RENT')
+                                const waterPayment = t.payments.find((p: any) => p.type === 'WATER')
                                 const collected = (rentPayment?.amount ?? 0) + (waterPayment?.amount ?? 0)
                                 return (
-                                    <tr key={t.id} className={`hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-neutral-900/10' : 'bg-neutral-50/10'}`}>
+                                    <tr key={t.id} className="hover:bg-neutral-50/50 transition-colors group">
                                         <td className="px-6 py-4 font-bold text-sm">{t.name}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
-                                                {t.offices.map(off => (
-                                                    <span key={off} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-muted-foreground border border-border uppercase">{off}</span>
+                                                {t.offices.map((off: string) => (
+                                                    <span key={off} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-neutral-100 text-slate-500 uppercase">{off}</span>
                                                 ))}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-sm font-bold text-right">Rs. {t.monthlyRent.toLocaleString()}</td>
                                         <td className="px-6 py-4 text-center">
                                             {rentPayment
-                                                ? <span className="flex items-center justify-center gap-1 text-emerald-600 text-[10px] font-black uppercase"><CheckCircle2 size={12} /> Paid</span>
-                                                : <span className="flex items-center justify-center gap-1 text-rose-500 text-[10px] font-black uppercase"><XCircle size={12} /> Unpaid</span>
+                                                ? <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase"><CheckCircle2 size={12} /> Paid</span>
+                                                : <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase"><XCircle size={12} /> Unpaid</span>
                                             }
                                         </td>
                                         <td className="px-6 py-4 text-sm font-bold text-right">Rs. {t.waterCharges.toLocaleString()}</td>
                                         <td className="px-6 py-4 text-center">
                                             {waterPayment
-                                                ? <span className="flex items-center justify-center gap-1 text-emerald-600 text-[10px] font-black uppercase"><CheckCircle2 size={12} /> Paid</span>
-                                                : <span className="flex items-center justify-center gap-1 text-rose-500 text-[10px] font-black uppercase"><XCircle size={12} /> Unpaid</span>
+                                                ? <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase"><CheckCircle2 size={12} /> Paid</span>
+                                                : <span className="inline-flex items-center gap-1 bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase"><XCircle size={12} /> Unpaid</span>
                                             }
                                         </td>
                                         <td className="px-6 py-4 text-sm font-bold text-right text-emerald-600">Rs. {collected.toLocaleString()}</td>
@@ -154,13 +154,13 @@ export default async function LedgerPage() {
                             })}
                         </tbody>
                         <tfoot>
-                            <tr className="bg-neutral-50 dark:bg-neutral-900/50 font-bold">
-                                <td colSpan={2} className="px-6 py-4 text-[11px] font-black uppercase tracking-wider text-muted-foreground">Monthly Total</td>
+                            <tr className="bg-neutral-50 text-slate-800 font-bold">
+                                <td colSpan={2} className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 rounded-bl-[2rem]">Monthly Total</td>
                                 <td className="px-6 py-4 text-right text-sm">Rs. {totalRentExpected.toLocaleString()}</td>
                                 <td className="px-6 py-4 text-center text-[10px] font-black text-emerald-600">Rs. {totalRentReceived.toLocaleString()}</td>
                                 <td className="px-6 py-4 text-right text-sm">Rs. {totalWaterExpected.toLocaleString()}</td>
                                 <td className="px-6 py-4 text-center text-[10px] font-black text-emerald-600">Rs. {totalWaterReceived.toLocaleString()}</td>
-                                <td className="px-6 py-4 text-right text-sm font-black text-emerald-600">Rs. {totalIncome.toLocaleString()}</td>
+                                <td className="px-6 py-4 text-right text-sm font-black text-emerald-600 rounded-br-[2rem]">Rs. {totalIncome.toLocaleString()}</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -169,38 +169,40 @@ export default async function LedgerPage() {
 
             {/* ── Expenses Breakdown ── */}
             {expenses.length > 0 && (
-                <div className="glass-card rounded-2xl overflow-hidden">
-                    <div className="px-6 py-5 border-b border-border">
-                        <h2 className="text-sm font-bold uppercase tracking-wider">Expense Breakdown (All Time)</h2>
+                <div className="bg-white premium-shadow rounded-[2rem] overflow-hidden text-slate-800">
+                    <div className="px-6 py-5 border-b border-neutral-100">
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">Expense Breakdown (All Time)</h2>
                     </div>
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-neutral-50/50 dark:bg-neutral-950/20">
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Date</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Category</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Description</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {expenses.map((e, index) => (
-                                <tr key={e.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-neutral-900/10' : 'bg-neutral-50/10'}`}>
-                                    <td className="px-6 py-3 text-sm text-muted-foreground">{new Date(e.date).toLocaleDateString()}</td>
-                                    <td className="px-6 py-3">
-                                        <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500">{e.category}</span>
-                                    </td>
-                                    <td className="px-6 py-3 text-sm">{e.description}</td>
-                                    <td className="px-6 py-3 text-sm font-bold text-right text-rose-500">Rs. {e.amount.toLocaleString()}</td>
+                    <div className="px-4 pb-4">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-neutral-100">
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Description</th>
+                                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Amount</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                        <tfoot>
-                            <tr className="bg-neutral-50 dark:bg-neutral-900/50">
-                                <td colSpan={3} className="px-6 py-4 text-[11px] font-black uppercase tracking-wider text-muted-foreground">Total Expenses</td>
-                                <td className="px-6 py-4 text-right font-black text-rose-500">Rs. {totalExpenses.toLocaleString()}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-50">
+                                {expenses.map((e: any, index: number) => (
+                                    <tr key={e.id} className="hover:bg-neutral-50/50 transition-colors group">
+                                        <td className="px-6 py-3 text-sm text-muted-foreground">{new Date(e.date).toLocaleDateString()}</td>
+                                        <td className="px-6 py-3">
+                                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500">{e.category}</span>
+                                        </td>
+                                        <td className="px-6 py-3 text-sm">{e.description}</td>
+                                        <td className="px-6 py-3 text-sm font-bold text-right text-rose-500">Rs. {e.amount.toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot>
+                                <tr className="bg-neutral-50 text-slate-800">
+                                    <td colSpan={3} className="px-6 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 rounded-bl-[2rem]">Total Expenses</td>
+                                    <td className="px-6 py-4 text-right font-black text-rose-500 rounded-br-[2rem]">Rs. {totalExpenses.toLocaleString()}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

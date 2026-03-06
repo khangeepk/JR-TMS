@@ -29,32 +29,32 @@ export default async function TenantsPage() {
                 </Link>
             </div>
 
-            <div className="glass-card rounded-2xl overflow-x-auto">
+            <div className="bg-white premium-shadow rounded-[2rem] overflow-x-auto p-4 lg:p-6 text-slate-800">
                 <table className="w-full text-left border-collapse min-w-[900px]">
                     <thead>
-                        <tr className="bg-neutral-50/50 dark:bg-neutral-950/20">
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Name</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Phone</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Offices</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Monthly Rent</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Water Charges</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Total/Month</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Start Date</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Security</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center">Actions</th>
+                        <tr className="border-b border-neutral-100">
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Name</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Phone</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Offices</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-right">Rent</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-right">Water</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-right">Total/Mo</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Start Date</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Security</th>
+                            <th className="px-5 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody className="divide-y divide-neutral-50">
                         {tenants.map((t, index) => {
                             const totalMonthly = t.monthlyRent + t.waterCharges
                             return (
                                 <tr
                                     key={t.id}
-                                    className={`hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 transition-colors ${index % 2 === 0 ? 'bg-white dark:bg-neutral-900/10' : 'bg-neutral-50/10 dark:bg-neutral-800/5'}`}
+                                    className="hover:bg-neutral-50/50 transition-colors group"
                                 >
                                     <td className="px-5 py-4">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-sm">{t.name}</span>
+                                            <span className="font-bold text-sm text-slate-800">{t.name}</span>
                                             {t.isShared && (
                                                 <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider">Shared</span>
                                             )}
@@ -74,11 +74,11 @@ export default async function TenantsPage() {
                                     <td className="px-5 py-4 text-sm text-muted-foreground whitespace-nowrap">{new Date(t.startDate).toLocaleDateString()}</td>
                                     <td className="px-5 py-4">
                                         <div className="space-y-1">
-                                            <span className={`block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center ${t.securityStatus === 'Fully Paid'
-                                                ? 'bg-emerald-500/10 text-emerald-600'
+                                            <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-center ${t.securityStatus === 'Fully Paid'
+                                                ? 'bg-emerald-100 text-emerald-700'
                                                 : t.securityStatus === 'Partial'
-                                                    ? 'bg-amber-500/10 text-amber-600'
-                                                    : 'bg-rose-500/10 text-rose-500'
+                                                    ? 'bg-amber-100 text-amber-700'
+                                                    : 'bg-rose-100 text-rose-700'
                                                 }`}>
                                                 {t.securityStatus}
                                             </span>
@@ -119,20 +119,20 @@ export default async function TenantsPage() {
                     </tbody>
                     {tenants.length > 0 && (
                         <tfoot>
-                            <tr className="bg-neutral-50 dark:bg-neutral-900/50">
-                                <td colSpan={3} className="px-5 py-4 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+                            <tr className="bg-neutral-50 text-slate-600">
+                                <td colSpan={3} className="px-5 py-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 rounded-bl-3xl">
                                     Total ({tenants.length} Tenants)
                                 </td>
-                                <td className="px-5 py-4 text-sm font-black text-right">
+                                <td className="px-5 py-4 text-sm font-bold text-right">
                                     Rs. {tenants.reduce((a, t) => a + t.monthlyRent, 0).toLocaleString()}
                                 </td>
-                                <td className="px-5 py-4 text-sm font-black text-right text-blue-600">
+                                <td className="px-5 py-4 text-sm font-bold text-right text-blue-600">
                                     Rs. {tenants.reduce((a, t) => a + t.waterCharges, 0).toLocaleString()}
                                 </td>
                                 <td className="px-5 py-4 text-sm font-black text-right text-emerald-600">
                                     Rs. {tenants.reduce((a, t) => a + t.monthlyRent + t.waterCharges, 0).toLocaleString()}
                                 </td>
-                                <td colSpan={3} />
+                                <td colSpan={3} className="rounded-br-3xl" />
                             </tr>
                         </tfoot>
                     )}

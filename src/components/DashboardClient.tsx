@@ -19,28 +19,46 @@ import {
     CheckCircle2
 } from 'lucide-react'
 
-// Sub-component for individual Stat Cards
-function StatCard({ title, value, subValue, icon: Icon, colorClass, trend }: any) {
+// Mockup SVG Sparklines for visual flair
+const SparklineGreen = () => (
+    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-12 stroke-emerald-400 fill-emerald-500/10 mt-2">
+        <path d="M0,30 L10,25 L30,28 L50,15 L70,22 L90,5 L100,0 L100,30 Z" stroke="none" />
+        <path d="M0,30 L10,25 L30,28 L50,15 L70,22 L90,5 L100,0" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+)
+
+const SparklineRed = () => (
+    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="w-full h-12 stroke-rose-400 fill-rose-500/10 mt-2">
+        <path d="M0,5 L10,8 L30,2 L50,15 L70,12 L90,25 L100,30 L100,30 L0,30 Z" stroke="none" />
+        <path d="M0,5 L10,8 L30,2 L50,15 L70,12 L90,25 L100,30" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+)
+
+// Sub-component for individual Stat Cards based on premium UI mockup
+function StatCard({ title, value, subValue, trendInfo, type = 'good' }: any) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 rounded-2xl flex items-center gap-5 group hover:scale-[1.02] transition-all duration-300"
+            className="bg-white premium-shadow rounded-2xl p-6 flex flex-col justify-between overflow-hidden relative group hover:-translate-y-1 transition-transform duration-300"
         >
-            <div className={cn("p-4 rounded-xl shadow-lg", colorClass)}>
-                <Icon size={24} className="text-white" />
+            <div className="flex justify-between items-start mb-2">
+                <p className="text-sm font-semibold text-slate-800">{title}</p>
+                {trendInfo && (
+                    <span className={cn("text-xs font-bold", type === 'good' ? "text-emerald-500" : "text-rose-500")}>
+                        {trendInfo}
+                    </span>
+                )}
             </div>
-            <div className="flex-1">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">{title}</p>
-                <div className="flex items-end gap-2 mt-1">
-                    <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
-                    {trend && (
-                        <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-0.5 pb-1">
-                            <TrendingUp size={10} /> {trend}
-                        </span>
-                    )}
-                </div>
-                <p className="text-[10px] font-medium text-muted-foreground/60 mt-0.5">{subValue}</p>
+
+            <div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{value}</h3>
+                <p className="text-[11px] font-medium text-slate-400 mt-1">{subValue}</p>
+            </div>
+
+            {/* Sparkline decoration at the bottom */}
+            <div className="absolute bottom-0 left-0 right-0 pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity">
+                {type === 'good' ? <SparklineGreen /> : <SparklineRed />}
             </div>
         </motion.div>
     )
@@ -156,35 +174,34 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
             className="space-y-8 pb-12"
         >
             {/* SaaS Metrics Header */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                 <StatCard
-                    title="Total Revenue"
+                    title="Total Expected Card"
+                    value={`Rs. ${grandTotalExpected.toLocaleString()}`}
+                    subValue="Positive trend"
+                    trendInfo="↑"
+                    type="good"
+                />
+                <StatCard
+                    title="Total Received Card"
                     value={`Rs. ${grandTotalReceived.toLocaleString()}`}
-                    subValue={`Target: Rs. ${grandTotalExpected.toLocaleString()}`}
-                    icon={CreditCard}
-                    colorClass="bg-blue-600 shadow-blue-500/20"
-                    trend="+12%"
+                    subValue="Spark Recovery"
+                    trendInfo="↑"
+                    type="good"
                 />
                 <StatCard
-                    title="Recovery Progress"
-                    value={`${recoveryRate}%`}
-                    subValue={`${grandTotalReceived.toLocaleString()} of ${grandTotalExpected.toLocaleString()}`}
-                    icon={TrendingUp}
-                    colorClass="bg-emerald-600 shadow-emerald-500/20"
+                    title="Total Pending Card"
+                    value={`Rs. ${grandTotalPending.toLocaleString()}`}
+                    subValue="Spark Pending"
+                    trendInfo="↓"
+                    type="bad"
                 />
                 <StatCard
-                    title="Active Tenants"
-                    value={activeTenantsCount}
-                    subValue="Total rented spaces"
-                    icon={Users}
-                    colorClass="bg-violet-600 shadow-violet-500/20"
-                />
-                <StatCard
-                    title="Pending Alerts"
-                    value={unpaidTenantsCount}
-                    subValue="Unpaid after 5th"
-                    icon={AlertCircle}
-                    colorClass="bg-rose-500 shadow-rose-500/20"
+                    title="Occupancy Rate"
+                    value={`${Math.min(100, Math.round((activeTenantsCount / 50) * 100))}%`}
+                    subValue="Based on 50 units"
+                    trendInfo=""
+                    type="good"
                 />
             </div>
 
@@ -230,25 +247,26 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-                {/* Enhanced Tenant List Table */}
+                {/* Enhanced Tenant List Table based on Mockup */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="xl:col-span-2 glass-card rounded-2xl overflow-hidden"
+                    className="xl:col-span-2 bg-white premium-shadow rounded-[2rem] overflow-hidden"
                 >
-                    <div className="px-6 py-5 border-b border-border flex items-center justify-between">
-                        <h2 className="text-xl font-bold tracking-tight">Active Tenants</h2>
-                        <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{filteredTenants.length} Found</span>
+                    <div className="px-8 py-6 border-b border-neutral-100 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold tracking-tight text-slate-800">Tenants Overview</h2>
+                            <p className="text-xs text-slate-400 mt-1">Clean UI, No internal borders, Increased vertical padding.</p>
+                        </div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto px-4 pb-4">
+                        <table className="w-full text-left">
                             <thead>
-                                <tr className="bg-neutral-50/50 dark:bg-neutral-950/20">
-                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Tenant</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Offices</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Rent</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-right">Water</th>
-                                    <th className="px-6 py-4 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] text-center">Action</th>
+                                <tr>
+                                    <th className="px-4 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Name</th>
+                                    <th className="px-4 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Office</th>
+                                    <th className="px-4 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Status Pill Badges</th>
+                                    <th className="px-4 py-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
@@ -269,68 +287,60 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                                                     index % 2 === 0 ? "bg-white dark:bg-neutral-900/10" : "bg-neutral-50/10 dark:bg-neutral-800/5"
                                                 )}
                                             >
-                                                <td className="px-6 py-5">
+                                                <td className="px-4 py-4">
                                                     <div className="flex flex-col">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-sm">{t.name}</span>
-                                                            {isPaid && <CheckCircle2 size={14} className="text-emerald-500" />}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-700 font-bold flex items-center justify-center text-xs">
+                                                                {t.name.substring(0, 2).toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <span className="font-bold text-sm text-slate-800 block">{t.name}</span>
+                                                                <span className="text-xs text-slate-500">{t.name}</span>
+                                                            </div>
                                                         </div>
-                                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">
-                                                            Since {new Date(t.startDate).toLocaleDateString()}
-                                                        </span>
-                                                        {/* Security Deposit Progress Widget */}
-                                                        <SecurityInstallmentButton tenant={t} />
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap">
+                                                <td className="px-4 py-4 whitespace-nowrap">
                                                     <div className="flex flex-wrap gap-1">
-                                                        {t.offices.map((off: string) => (
-                                                            <span key={off} className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-neutral-100 dark:bg-neutral-800 text-muted-foreground border border-border uppercase">
-                                                                {off}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-right">
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="text-sm font-bold">Rs. {t.monthlyRent.toLocaleString()}</span>
-                                                        <span className={cn("text-[9px] font-black uppercase tracking-tighter", rentPaid ? "text-emerald-500" : "text-rose-500")}>
-                                                            {rentPaid ? 'Paid' : 'Unpaid'}
+                                                        <span className="text-sm font-medium text-slate-700">
+                                                            {t.offices.join(', ')}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-right">
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="text-sm font-bold">Rs. {t.waterCharges.toLocaleString()}</span>
-                                                        <span className={cn("text-[9px] font-black uppercase tracking-tighter", waterPaid ? "text-emerald-500" : "text-rose-500")}>
-                                                            {waterPaid ? 'Paid' : 'Unpaid'}
-                                                        </span>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        {isPaid ? (
+                                                            <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider">PAID</span>
+                                                        ) : (
+                                                            <>
+                                                                <span className="px-2.5 py-1 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full uppercase tracking-wider">PENDING</span>
+                                                                {(rentPaid || waterPaid) && <span className="px-2.5 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase tracking-wider">PARTIAL</span>}
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5 whitespace-nowrap text-center">
-                                                    <div className="flex items-center justify-center gap-4">
-                                                        {/* Integrated Actions with context Menu feel */}
-                                                        <div className="flex items-center gap-2">
-                                                            {!rentPaid && (
-                                                                <button
-                                                                    onClick={() => startTransition(async () => {
+
+                                                <td className="px-4 py-4 whitespace-nowrap text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        {!isPaid && (
+                                                            <button
+                                                                onClick={() => startTransition(async () => {
+                                                                    if (!rentPaid) {
                                                                         addOptimisticPayment({ tenantId: t.id, amount: t.monthlyRent, month: currentMonth, type: 'RENT', receiptId: 'opt' })
                                                                         await markAsPaid(t.id, t.monthlyRent, 'RENT')
-                                                                    })}
-                                                                    className="px-2 py-1 bg-emerald-500/10 text-emerald-600 text-[10px] font-bold rounded-lg hover:bg-emerald-500 hover:text-white transition-all uppercase"
-                                                                >Pay Rent</button>
-                                                            )}
-                                                            {!waterPaid && (
-                                                                <button
-                                                                    onClick={() => startTransition(async () => {
-                                                                        addOptimisticPayment({ tenantId: t.id, amount: t.waterCharges, month: currentMonth, type: 'WATER', receiptId: 'opt' })
+                                                                    }
+                                                                    if (!waterPaid) {
+                                                                        addOptimisticPayment({ tenantId: t.id, amount: t.waterCharges, month: currentMonth, type: 'WATER', receiptId: 'opt2' })
                                                                         await markAsPaid(t.id, t.waterCharges, 'WATER')
-                                                                    })}
-                                                                    className="px-2 py-1 bg-blue-500/10 text-blue-600 text-[10px] font-bold rounded-lg hover:bg-blue-500 hover:text-white transition-all uppercase"
-                                                                >Pay Water</button>
-                                                            )}
-                                                            <WhatsAppActionButton tenantId={t.id} amount={t.monthlyRent + t.waterCharges} month={currentMonth} phone={t.phone} isPaid={isPaid} />
-                                                        </div>
+                                                                    }
+                                                                })}
+                                                                className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-lg hover:bg-emerald-600 transition-all uppercase"
+                                                            >Pay</button>
+                                                        )}
+                                                        <WhatsAppActionButton tenantId={t.id} amount={t.monthlyRent + t.waterCharges} month={currentMonth} phone={t.phone} isPaid={isPaid} />
+                                                        <button className="p-1 text-slate-400 hover:text-slate-600">
+                                                            <MoreVertical size={16} />
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </motion.tr>
@@ -339,11 +349,8 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                                 </AnimatePresence>
                                 {filteredTenants.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center">
-                                            <div className="flex flex-col items-center gap-2 opacity-50">
-                                                <Users size={48} className="mb-2" />
-                                                <p className="text-sm font-medium">No tenants match your search.</p>
-                                            </div>
+                                        <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                                            No tenants match your search.
                                         </td>
                                     </tr>
                                 )}
@@ -352,69 +359,48 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                     </div>
                 </motion.div>
 
-                {/* SaaS Side Panel (Add Tenant) */}
+                {/* SaaS Side Panel (Add Tenant) heavily styled based on mockup */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="glass-card p-6 rounded-2xl relative overflow-hidden"
+                    className="bg-white premium-shadow p-8 rounded-[2rem] relative overflow-hidden h-fit"
                 >
-                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-                        <Plus size={120} />
-                    </div>
-                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                        <Plus className="text-emerald-500" /> Register Tenant
-                    </h2>
-                    <form action={addTenant} className="space-y-5">
+                    <h2 className="text-xl font-bold mb-6 text-slate-800">Add New Tenant</h2>
+                    <form action={addTenant} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Full Name</label>
-                            <input name="name" required className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium" placeholder="E.g. Hassan Ahmed" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Office No.</label>
-                                <input name="offices" required className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium" placeholder="G-10" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Monthly Rent</label>
-                                <input name="monthlyRent" type="number" required className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium" placeholder="25000" />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Phone</label>
-                                <input name="phone" required className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium" placeholder="+92 3..." />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Water Charges</label>
-                                <input name="waterCharges" type="number" defaultValue="500" className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium" />
-                            </div>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">Start Date</label>
-                            <input name="startDate" type="date" required className="w-full bg-neutral-100 dark:bg-neutral-800/50 border-none rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-medium [color-scheme:light] dark:[color-scheme:dark]" />
+                            <label className="text-[12px] font-medium text-slate-700 ml-1">Name</label>
+                            <input name="name" required className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" placeholder="First Name" />
                         </div>
 
-                        {/* Security Deposit Section */}
-                        <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/20 bg-amber-50/50 dark:bg-amber-500/5 space-y-3">
-                            <div className="flex items-center gap-2">
-                                <div className="w-1 h-4 bg-amber-500 rounded-full" />
-                                <label className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-[0.2em]">Security Deposit</label>
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-medium text-slate-700 ml-1">Email / Phone</label>
+                            <input name="phone" required className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" placeholder="Modern Input" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-medium text-slate-700 ml-1">Inputs / Office Num</label>
+                            <input name="offices" required className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" placeholder="Indent Inputs" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <label className="text-[12px] font-medium text-slate-700 ml-1">Accounts (Rent)</label>
+                                <input name="monthlyRent" type="number" required className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" placeholder="Enter amount" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] ml-1">Total Security Amount</label>
-                                <input
-                                    name="totalSecurityAmount"
-                                    type="number"
-                                    defaultValue="0"
-                                    min="0"
-                                    className="w-full bg-white dark:bg-neutral-800 border border-amber-200 dark:border-amber-500/20 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-medium"
-                                    placeholder="E.g. 50000"
-                                />
+                                <label className="text-[12px] font-medium text-slate-700 ml-1">Water</label>
+                                <input name="waterCharges" type="number" defaultValue="500" className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" />
                             </div>
-                            <p className="text-[10px] text-muted-foreground">Set to 0 if no security deposit is required. You can collect installments after registration.</p>
                         </div>
-                        <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all mt-4 uppercase tracking-[0.2em] text-[10px]">
-                            Establish Occupancy
+
+                        <div className="space-y-1.5 mt-2">
+                            <label className="text-[12px] font-medium text-slate-700 ml-1">Total Security</label>
+                            <input name="totalSecurityAmount" type="number" defaultValue="0" className="w-full bg-[#F3F4F6] border-none rounded-full px-6 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-600 font-medium" placeholder="Amount" />
+                        </div>
+
+                        {/* Hidden start date to preserve backend logic */}
+                        <input type="hidden" name="startDate" value={new Date().toISOString().split('T')[0]} />
+
+                        <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-full shadow-lg shadow-emerald-500/30 transition-all mt-6 tracking-wide text-sm">
+                            Action
                         </button>
                     </form>
                 </motion.div>
