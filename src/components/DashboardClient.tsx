@@ -65,7 +65,11 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
     )
 
     const totalRentReceived = optimisticPayments.filter((p: any) => p.type === 'RENT').reduce((acc: number, p: any) => acc + p.amount, 0)
-    const totalWaterReceived = optimisticPayments.filter((p: any) => p.type === 'WATER').reduce((acc: number, p: any) => acc + p.amount, 0)
+    const totalWaterReceived = initialTenants.reduce((acc: number, t: any) => {
+        const waterPaid = optimisticPayments.some((p: any) => p.tenantId === t.id && p.type === 'WATER')
+        return acc + (waterPaid ? t.waterCharges : 0)
+    }, 0)
+
     const grandTotalReceived = totalRentReceived + totalWaterReceived
 
     const totalRentPending = totalRentExpected - totalRentReceived

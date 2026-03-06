@@ -21,24 +21,24 @@ export default async function LedgerPage() {
 
     // ── Income calculations ──────────────────────────────────────────────────
     // Expected = what ALL tenants SHOULD pay
-    const totalRentExpected = tenants.reduce((acc, t) => acc + t.monthlyRent, 0)
-    const totalWaterExpected = tenants.reduce((acc, t) => acc + t.waterCharges, 0)
+    const totalRentExpected = tenants.reduce((acc: number, t) => acc + t.monthlyRent, 0)
+    const totalWaterExpected = tenants.reduce((acc: number, t) => acc + t.waterCharges, 0)
 
     // Received = only tenants whose PaymentRecord (type=RENT/WATER) exists this month
-    const totalRentReceived = tenants.reduce((acc, t) => {
+    const totalRentReceived = tenants.reduce((acc: number, t) => {
         const p = t.payments.find(p => p.type === 'RENT')
         // Use the stored payment amount (equals t.monthlyRent at time of payment)
         return acc + (p ? p.amount : 0)
     }, 0)
 
-    const totalWaterReceived = tenants.reduce((acc, t) => {
+    const totalWaterReceived = tenants.reduce((acc: number, t) => {
         const p = t.payments.find(p => p.type === 'WATER')
-        // Use tenant's waterCharges field — the payment amount recorded
-        return acc + (p ? p.amount : 0)
+        // Use tenant's current waterCharges instead of the historical payment amount
+        return acc + (p ? t.waterCharges : 0)
     }, 0)
 
     const totalIncome = totalRentReceived + totalWaterReceived
-    const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0)
+    const totalExpenses = expenses.reduce((acc: number, e: any) => acc + e.amount, 0)
     const netProfit = totalIncome - totalExpenses
     const isProfit = netProfit >= 0
 

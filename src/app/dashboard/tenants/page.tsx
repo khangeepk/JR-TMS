@@ -75,10 +75,10 @@ export default async function TenantsPage() {
                                     <td className="px-5 py-4">
                                         <div className="space-y-1">
                                             <span className={`block px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-center ${t.securityStatus === 'Fully Paid'
-                                                    ? 'bg-emerald-500/10 text-emerald-600'
-                                                    : t.securityStatus === 'Partial'
-                                                        ? 'bg-amber-500/10 text-amber-600'
-                                                        : 'bg-rose-500/10 text-rose-500'
+                                                ? 'bg-emerald-500/10 text-emerald-600'
+                                                : t.securityStatus === 'Partial'
+                                                    ? 'bg-amber-500/10 text-amber-600'
+                                                    : 'bg-rose-500/10 text-rose-500'
                                                 }`}>
                                                 {t.securityStatus}
                                             </span>
@@ -99,7 +99,9 @@ export default async function TenantsPage() {
                                                 waterCharges: t.waterCharges,
                                                 offices: t.offices,
                                                 isShared: t.isShared,
-                                                startDate: t.startDate
+                                                startDate: t.startDate,
+                                                totalSecurityAmount: t.totalSecurityAmount,
+                                                securityPaidSoFar: t.securityPaidSoFar
                                             }} />
                                             <DeleteTenantButton id={t.id} name={t.name} />
                                         </div>

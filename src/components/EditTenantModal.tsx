@@ -14,6 +14,8 @@ type Tenant = {
     offices: string[]
     isShared: boolean
     startDate: Date | string
+    totalSecurityAmount: number
+    securityPaidSoFar: number
 }
 
 // Helper: convert any date value to yyyy-MM-dd for <input type="date">
@@ -36,6 +38,14 @@ export default function EditTenantModal({ tenant }: { tenant: Tenant }) {
         e.preventDefault()
         setError(null)
         const formData = new FormData(e.currentTarget)
+
+        const total = parseFloat(formData.get('totalSecurityAmount') as string || "0")
+        const paid = parseFloat(formData.get('securityPaidSoFar') as string || "0")
+
+        if (paid > total) {
+            setError("Paid Security cannot be more than Total Security.")
+            return
+        }
 
         startTransition(async () => {
             try {
@@ -150,41 +160,67 @@ export default function EditTenantModal({ tenant }: { tenant: Tenant }) {
                                 </div>
                             </div>
 
-                            {/* Start Date — FIXED: was completely missing before */}
-                            <div>
-                                <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em] mb-1.5 block">Start Date</label>
-                                <input
-                                    name="startDate"
-                                    type="date"
-                                    defaultValue={toDateInputValue(tenant.startDate)}
-                                    required
-                                    className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium [color-scheme:light] dark:[color-scheme:dark]"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Total Security */}
+                                <div>
+                                    <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em] mb-1.5 block">Total Security</label>
+                                    <input
+                                        name="totalSecurityAmount"
+                                        type="number"
+                                        defaultValue={tenant.totalSecurityAmount}
+                                        required
+                                        className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+                                    />
+                                </div>
+                                {/* Paid Security Amount */}
+                                <div>
+                                    <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em] mb-1.5 block">Enter Paid Security Amount</label>
+                                    <input
+                                        name="securityPaidSoFar"
+                                        type="number"
+                                        defaultValue={tenant.securityPaidSoFar}
+                                        required
+                                        className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+                                    />
+                                </div>
                             </div>
 
-                            {/* Shared Space — FIXED: was completely missing before */}
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800">
-                                <input
-                                    type="checkbox"
-                                    name="isShared"
-                                    id={`isShared-${tenant.id}`}
-                                    defaultChecked={tenant.isShared}
-                                    className="w-4 h-4 rounded accent-emerald-600 cursor-pointer"
-                                />
-                                <label
-                                    htmlFor={`isShared-${tenant.id}`}
-                                    className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider cursor-pointer select-none"
-                                >
-                                    Shared Space
-                                </label>
+                            <div className="grid grid-cols-2 gap-4 items-end">
+                                {/* Start Date */}
+                                <div>
+                                    <label className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-[0.2em] mb-1.5 block">Start Date</label>
+                                    <input
+                                        name="startDate"
+                                        type="date"
+                                        defaultValue={toDateInputValue(tenant.startDate)}
+                                        required
+                                        className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-neutral-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium [color-scheme:light] dark:[color-scheme:dark]"
+                                    />
+                                </div>
+                                {/* Shared Space */}
+                                <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 h-[42px]">
+                                    <input
+                                        type="checkbox"
+                                        name="isShared"
+                                        id={`isShared-${tenant.id}`}
+                                        defaultChecked={tenant.isShared}
+                                        className="w-4 h-4 rounded accent-emerald-600 cursor-pointer"
+                                    />
+                                    <label
+                                        htmlFor={`isShared-${tenant.id}`}
+                                        className="text-[10px] font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider cursor-pointer select-none"
+                                    >
+                                        Shared Space
+                                    </label>
+                                </div>
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all mt-4 uppercase tracking-[0.2em] text-[10px]"
+                                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/20 transition-all mt-4 uppercase tracking-[0.2em] text-[10px]"
                             >
-                                {isPending ? 'Syncing...' : 'Update Records'}
+                                {isPending ? 'Syncing...' : 'UPDATE RECORDS (V2)'}
                             </button>
                         </form>
                     </div>

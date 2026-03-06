@@ -27,7 +27,9 @@ const UpdateTenantSchema = z.object({
   waterCharges: z.number().min(0, "Water charges cannot be negative"),
   officesString: z.string().min(1, "At least one office must be provided"),
   startDateStr: z.string().min(1, "Start Date is required"),
-  isShared: z.boolean().default(false)
+  isShared: z.boolean().default(false),
+  totalSecurityAmount: z.number().min(0).default(0),
+  securityPaidSoFar: z.number().min(0).default(0)
 })
 
 export async function addTenant(formData: FormData) {
@@ -107,7 +109,9 @@ export async function updateTenant(formData: FormData) {
       waterCharges: parseFloat(formData.get('waterCharges') as string || "0"),
       officesString: formData.get('offices') as string,
       startDateStr: formData.get('startDate') as string,
-      isShared: formData.get('isShared') === 'on'
+      isShared: formData.get('isShared') === 'on',
+      totalSecurityAmount: parseFloat(formData.get('totalSecurityAmount') as string || "0"),
+      securityPaidSoFar: parseFloat(formData.get('securityPaidSoFar') as string || "0")
     }
 
     const parsed = UpdateTenantSchema.parse(rawData)
@@ -134,16 +138,50 @@ export async function updateTenant(formData: FormData) {
       }
     }
 
+    const existingTenant = await prisma.tenantProfile.findUnique({
+      where: { id: parsed.id }
+    })
+
+    if (!existingTenant) throw new Error("Tenant not found")
+
+    // Zero-Value Protection: Use existing values if new values are 0 or invalid
+    // This prevents accidental "0" overwrites if the user clears a field
+    const updatedRent = parsed.rent || existingTenant.monthlyRent
+    const updatedWater = parsed.waterCharges || existingTenant.waterCharges
+    const updatedTotalSecurity = parsed.totalSecurityAmount || existingTenant.totalSecurityAmount
+    const updatedPaidSecurity = parsed.securityPaidSoFar || existingTenant.securityPaidSoFar
+
+    // Security Status Logic
+    const newStatus = updatedPaidSecurity >= updatedTotalSecurity
+      ? "Fully Paid"
+      : updatedPaidSecurity > 0
+        ? "Partial"
+        : "Pending"
+
+    // Audit Trail: Create installment if paid amount increased
+    if (updatedPaidSecurity > existingTenant.securityPaidSoFar) {
+      const increment = updatedPaidSecurity - existingTenant.securityPaidSoFar
+      await prisma.securityInstallment.create({
+        data: {
+          tenantId: parsed.id,
+          amount: increment
+        }
+      })
+    }
+
     await prisma.tenantProfile.update({
       where: { id: parsed.id },
       data: {
         name: parsed.name,
         phone: parsed.phone,
-        monthlyRent: parsed.rent,
-        waterCharges: parsed.waterCharges,
+        monthlyRent: updatedRent,
+        waterCharges: updatedWater,
         offices: officesArray,
         isShared: parsed.isShared,
-        startDate: new Date(parsed.startDateStr)
+        startDate: new Date(parsed.startDateStr),
+        totalSecurityAmount: updatedTotalSecurity,
+        securityPaidSoFar: updatedPaidSecurity,
+        securityStatus: newStatus
       }
     })
 
@@ -175,6 +213,15 @@ export async function markAsPaid(tenantId: number, amount: number, type: 'RENT' 
   try {
     const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })
 
+    const tenant = await prisma.tenantProfile.findUnique({
+      where: { id: tenantId }
+    })
+
+    if (!tenant) throw new Error("Tenant not found")
+
+    // Financial Integrity: Fetch specific amount from profile if type is WATER or RENT
+    const finalAmount = type === 'WATER' ? tenant.waterCharges : (type === 'RENT' ? tenant.monthlyRent : amount)
+
     const existingPayment = await prisma.paymentRecord.findFirst({
       where: { tenantId, month: currentMonth, type }
     })
@@ -186,7 +233,7 @@ export async function markAsPaid(tenantId: number, amount: number, type: 'RENT' 
     await prisma.paymentRecord.create({
       data: {
         tenantId,
-        amount,
+        amount: finalAmount,
         type,
         month: currentMonth
       }
@@ -199,7 +246,7 @@ export async function markAsPaid(tenantId: number, amount: number, type: 'RENT' 
 
     let fallbackUrl = null;
     try {
-      const waRes = await sendReceiptWhatsApp(tenantId, amount, currentMonth, type)
+      const waRes = await sendReceiptWhatsApp(tenantId, finalAmount, currentMonth, type)
       if (waRes && waRes.fallbackUrl) {
         fallbackUrl = waRes.fallbackUrl
       }

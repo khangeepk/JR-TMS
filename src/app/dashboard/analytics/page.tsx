@@ -19,9 +19,18 @@ export default async function AnalyticsPage() {
     const totalRentExpected = tenants.reduce((acc, t) => acc + t.monthlyRent, 0)
     const totalWaterExpected = tenants.reduce((acc, t) => acc + t.waterCharges, 0)
     const totalRentReceived = currentMonthPayments.filter(p => p.type === 'RENT').reduce((acc, p) => acc + p.amount, 0)
-    const totalWaterReceived = currentMonthPayments.filter(p => p.type === 'WATER').reduce((acc, p) => acc + p.amount, 0)
+    // Water Received should be sum of current waterCharges for tenants who paid water this month
+    const totalWaterReceived = tenants.reduce((acc, t) => {
+        const waterPaid = currentMonthPayments.some(p => p.tenantId === t.id && p.type === 'WATER')
+        return acc + (waterPaid ? t.waterCharges : 0)
+    }, 0)
     const totalSecurityCollected = tenants.reduce((acc, t) => acc + t.securityPaidSoFar, 0)
-    const totalSecurityPending = tenants.reduce((acc, t) => acc + (t.totalSecurityAmount - t.securityPaidSoFar), 0)
+    // Security pending should only be calculated if totalSecurityAmount > 0 and it shouldn't be negative
+    const totalSecurityPending = tenants.reduce((acc, t) => {
+        if (t.totalSecurityAmount <= 0) return acc;
+        const pending = t.totalSecurityAmount - t.securityPaidSoFar;
+        return acc + (pending > 0 ? pending : 0);
+    }, 0)
 
     const rentRecovery = totalRentExpected > 0 ? Math.round((totalRentReceived / totalRentExpected) * 100) : 0
     const waterRecovery = totalWaterExpected > 0 ? Math.round((totalWaterReceived / totalWaterExpected) * 100) : 0
