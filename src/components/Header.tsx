@@ -7,7 +7,7 @@ import { useMobileSidebar } from '@/lib/MobileSidebarContext'
 
 export default function Header() {
     const { data: session } = useSession()
-    const { toggle } = useMobileSidebar()
+    // const { toggle } = useMobileSidebar()
 
     // Get initials. Default to "AD" for admin if name is missing
     const username = session?.user?.name || 'Admin'
@@ -18,7 +18,7 @@ export default function Header() {
             {/* Left side: Hamburger (Mobile Only) and Page Title */}
             <div className="flex items-center gap-4">
                 <button 
-                    onClick={toggle}
+                    // onClick={toggle}
                     className="p-2 -ml-2 md:hidden text-slate-600 hover:bg-white rounded-lg transition-colors"
                     aria-label="Toggle Menu"
                 >

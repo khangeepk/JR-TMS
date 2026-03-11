@@ -31,8 +31,20 @@ const menuItems = [
 
 export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
     const pathname = usePathname()
-    const { isOpen, setIsOpen, toggle } = useMobileSidebar()
+    // const { isOpen, setIsOpen, toggle } = useMobileSidebar()
+    const isOpen = false
+    const setIsOpen = (val: boolean) => {}
+    const toggle = () => {}
+
+    // Handle hydration safely
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
 
     // Close sidebar on route change on mobile
     useEffect(() => {
@@ -58,16 +70,13 @@ export default function Sidebar() {
                 initial={false}
                 animate={{ 
                     width: isCollapsed ? 80 : 260,
-                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 768 ? -260 : 0)
+                    x: isOpen ? 0 : (isMobile ? -260 : 0)
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
                 className={cn(
                     "fixed md:relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-50 md:z-20",
                     !isOpen && "hidden md:flex"
                 )}
-                style={{
-                    x: isOpen ? 0 : undefined // Framer motion handles x on mobile
-                }}
             >
                 {/* Brand Header */}
                 <div className="flex items-center h-20 px-6 overflow-hidden">
@@ -115,7 +124,7 @@ export default function Sidebar() {
                                     )}
                                 >
                                     <item.icon size={20} className={cn("flex-shrink-0", isActive ? "text-white" : "group-hover:text-emerald-400 transition-colors")} />
-                                    {(!isCollapsed || (typeof window !== 'undefined' && window.innerWidth < 768)) && (
+                                    {(!isCollapsed || isMobile) && (
                                         <motion.span
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
@@ -141,7 +150,7 @@ export default function Sidebar() {
                     </button>
                     <button className="flex items-center gap-3 w-full px-4 py-3 mt-1 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-medium text-sm">
                         <LogOut size={20} />
-                        {(!isCollapsed || (typeof window !== 'undefined' && window.innerWidth < 768)) && <span>Logout</span>}
+                        {(!isCollapsed || isMobile) && <span>Logout</span>}
                     </button>
                 </div>
             </motion.aside>
