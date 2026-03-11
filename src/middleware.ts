@@ -7,5 +7,5 @@ export default withAuth({
 })
 
 export const config = {
-    matcher: ["/non-existent-route-for-debug"],
+    matcher: ["/dashboard/:path*"],
 }
