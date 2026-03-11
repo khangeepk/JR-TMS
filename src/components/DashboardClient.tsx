@@ -11,6 +11,8 @@ import { markAsPaid } from '@/app/dashboard/actions'
 import { useRouter } from 'next/navigation'
 import WhatsAppActionButton from './WhatsAppActionButton'
 import SecurityInstallmentButton from './SecurityInstallmentButton'
+import WhatsAppConfigModal from './WhatsAppConfigModal'
+import { Webhook } from 'lucide-react'
 
 interface Tenant {
     id: number
@@ -46,6 +48,7 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [toast, setToast] = useState<string | null>(null)
+    const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false)
 
     const showToast = (msg: string) => {
         setToast(msg)
@@ -146,21 +149,40 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">Overview for <span className="font-semibold text-slate-700">{currentMonth}</span></p>
                 </div>
-                <Link
-                    href="/dashboard/tenants"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.97] text-white text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 w-fit"
-                >
-                    <Users size={14} />
-                    Manage Tenants
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                    <button
+                        onClick={() => setIsWhatsAppModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 active:scale-[0.97] text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-sm w-fit group"
+                    >
+                        <Webhook size={14} className="group-hover:animate-spin-slow" />
+                        Configure Global WhatsApp Settings
+                    </button>
+                    <Link
+                        href="/dashboard/tenants"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.97] text-white text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 w-fit"
+                    >
+                        <Users size={14} />
+                        Manage Tenants
+                    </Link>
+                </div>
             </div>
 
             {/* ── Stat Cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {statCards.map((card) => (
-                    <div key={card.label} className={`bg-white premium-shadow rounded-2xl p-5 border-l-4 ${card.border}`}>
+                    <div key={card.label} className={`bg-white premium-shadow rounded-2xl p-5 border-l-4 ${card.border} relative`}>
+                        {/* Active Indicator for Rent Pending */}
+                        {card.label === 'Rent Pending' && (
+                            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100" title="Automated Reminders Active">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Active</span>
+                            </div>
+                        )}
                         <div className="flex items-center justify-between mb-3">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] leading-tight">{card.label}</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] leading-tight pr-12">{card.label}</p>
                             <div className={`p-2 ${card.bg} rounded-xl`}>
                                 <card.icon size={16} className={card.color} />
                             </div>
@@ -350,6 +372,12 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                     </div>
                 </Link>
             </div>
+
+            {/* WhatsApp Configuration Modal */}
+            <WhatsAppConfigModal 
+                isOpen={isWhatsAppModalOpen} 
+                onClose={() => setIsWhatsAppModalOpen(false)} 
+            />
         </div>
     )
 }

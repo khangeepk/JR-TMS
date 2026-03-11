@@ -25,9 +25,9 @@ export default function WhatsAppActionButton({ tenantId, phone, isPaid, amount, 
             try {
                 let res;
                 if (isPaid) {
-                    res = await sendReceiptWhatsApp(tenantId, amount, month)
+                    res = await sendReceiptWhatsApp(tenantId, amount, month, 'RENT')
                 } else {
-                    res = await sendManualReminder(tenantId, month)
+                    res = await sendManualReminder(tenantId, month, 'RENT')
                 }
 
                 if (res?.fallbackUrl) {
@@ -47,12 +47,10 @@ export default function WhatsAppActionButton({ tenantId, phone, isPaid, amount, 
         <button
             onClick={handleAction}
             disabled={isPending}
-            title={isPaid ? `Send receipt to ${phone}` : `Send reminder to ${phone}`}
+            title="Send Manual WhatsApp Message"
             className={cn(
                 "p-2 rounded-full transition-all duration-300 disabled:opacity-50",
-                isPaid
-                    ? "text-emerald-500 hover:bg-emerald-500/10"
-                    : "text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 animate-pulse-subtle shadow-lg shadow-rose-500/20"
+                "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 shadow-sm"
             )}
         >
             {isPending ? (
