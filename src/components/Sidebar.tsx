@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     LayoutDashboard,
     Users,
@@ -11,12 +11,14 @@ import {
     ChevronRight,
     LogOut,
     Building2,
-    ShoppingCart
+    ShoppingCart,
+    X
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useMobileSidebar } from '@/lib/MobileSidebarContext'
 
 const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -30,79 +32,119 @@ const menuItems = [
 export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const pathname = usePathname()
+    const { isOpen, setIsOpen, toggle } = useMobileSidebar()
+
+    // Close sidebar on route change on mobile
+    useEffect(() => {
+        setIsOpen(false)
+    }, [pathname, setIsOpen])
 
     return (
-        <motion.aside
-            initial={false}
-            animate={{ width: isCollapsed ? 80 : 260 }}
-            className="relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-20"
-        >
-            {/* Brand Header */}
-            <div className="flex items-center h-20 px-6 overflow-hidden">
-                <div className="flex items-center gap-3 w-full justify-center md:justify-start">
-                    <div className="flex-shrink-0 flex items-center justify-center text-emerald-500">
-                        {/* Custom JR typography logo based on mockup */}
-                        <span className="text-3xl font-black tracking-tighter">JR</span>
-                    </div>
-                    <AnimatePresence>
-                        {!isCollapsed && (
-                            <motion.span
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
-                                className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
-                            >
-                                <span className="opacity-0 w-0 hidden md:inline-block">JR</span> Arcade <span className="text-emerald-500 font-medium">TMS</span>
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
+        <>
+            {/* Backdrop for Mobile */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={toggle}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                    />
+                )}
+            </AnimatePresence>
 
-            {/* Navigation */}
-            <nav className="flex-1 px-3 py-4 space-y-1">
-                {menuItems.map((item) => {
-                    const isActive = pathname === item.href
-                    return (
-                        <Link key={item.label} href={item.href}>
-                            <div
-                                className={cn(
-                                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative my-1",
-                                    isActive
-                                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
-                                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                                )}
-                            >
-                                <item.icon size={20} className={cn("flex-shrink-0", isActive ? "text-white" : "group-hover:text-emerald-400 transition-colors")} />
+            <motion.aside
+                initial={false}
+                animate={{ 
+                    width: isCollapsed ? 80 : 260,
+                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 768 ? -260 : 0)
+                }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className={cn(
+                    "fixed md:relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-50 md:z-20",
+                    !isOpen && "hidden md:flex"
+                )}
+                style={{
+                    x: isOpen ? 0 : undefined // Framer motion handles x on mobile
+                }}
+            >
+                {/* Brand Header */}
+                <div className="flex items-center h-20 px-6 overflow-hidden">
+                    <div className="flex items-center gap-3 w-full justify-between md:justify-start">
+                        <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 flex items-center justify-center text-emerald-500">
+                                <span className="text-3xl font-black tracking-tighter">JR</span>
+                            </div>
+                            <AnimatePresence>
                                 {!isCollapsed && (
                                     <motion.span
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="font-medium text-sm"
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -10 }}
+                                        className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
                                     >
-                                        {item.label}
+                                        JR Arcade <span className="text-emerald-500 font-medium">TMS</span>
                                     </motion.span>
                                 )}
-                            </div>
-                        </Link>
-                    )
-                })}
-            </nav>
+                            </AnimatePresence>
+                        </div>
+                        
+                        {/* Close button for mobile */}
+                        <button 
+                            onClick={toggle}
+                            className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                </div>
 
-            {/* Footer / Toggle */}
-            <div className="p-4 border-t border-slate-700/50">
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all font-medium text-sm"
-                >
-                    {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                    {!isCollapsed && <span>Collapse Menu</span>}
-                </button>
-                <button className="flex items-center gap-3 w-full px-4 py-3 mt-1 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-medium text-sm">
-                    <LogOut size={20} />
-                    {!isCollapsed && <span>Logout</span>}
-                </button>
-            </div>
-        </motion.aside>
+                {/* Navigation */}
+                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.href
+                        return (
+                            <Link key={item.label} href={item.href}>
+                                <div
+                                    className={cn(
+                                        "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative my-1",
+                                        isActive
+                                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                    )}
+                                >
+                                    <item.icon size={20} className={cn("flex-shrink-0", isActive ? "text-white" : "group-hover:text-emerald-400 transition-colors")} />
+                                    {(!isCollapsed || (typeof window !== 'undefined' && window.innerWidth < 768)) && (
+                                        <motion.span
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="font-medium text-sm"
+                                        >
+                                            {item.label}
+                                        </motion.span>
+                                    )}
+                                </div>
+                            </Link>
+                        )
+                    })}
+                </nav>
+
+                {/* Footer / Toggle */}
+                <div className="p-4 border-t border-slate-700/50">
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="hidden md:flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all font-medium text-sm"
+                    >
+                        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                        {!isCollapsed && <span>Collapse Menu</span>}
+                    </button>
+                    <button className="flex items-center gap-3 w-full px-4 py-3 mt-1 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-medium text-sm">
+                        <LogOut size={20} />
+                        {(!isCollapsed || (typeof window !== 'undefined' && window.innerWidth < 768)) && <span>Logout</span>}
+                    </button>
+                </div>
+            </motion.aside>
+        </>
     )
 }

@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "prisma/OLD_seed.ts_backup", "src/app/dashboard/page.js"  ],
   "exclude": ["node_modules"]
 }
