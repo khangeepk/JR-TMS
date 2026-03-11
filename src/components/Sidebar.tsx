@@ -14,7 +14,6 @@ import {
     ShoppingCart,
     X
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -53,29 +52,11 @@ export default function Sidebar() {
 
     return (
         <>
-            {/* Backdrop for Mobile */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={toggle}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-                    />
-                )}
-            </AnimatePresence>
-
-            <motion.aside
-                initial={false}
-                animate={{ 
-                    width: isCollapsed ? 80 : 260,
-                    x: isOpen ? 0 : (isMobile ? -260 : 0)
-                }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            <aside
                 className={cn(
                     "fixed md:relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-50 md:z-20",
-                    !isOpen && "hidden md:flex"
+                    !isOpen && "hidden md:flex",
+                    isCollapsed ? "w-20" : "w-[260px]"
                 )}
             >
                 {/* Brand Header */}
@@ -85,18 +66,13 @@ export default function Sidebar() {
                             <div className="flex-shrink-0 flex items-center justify-center text-emerald-500">
                                 <span className="text-3xl font-black tracking-tighter">JR</span>
                             </div>
-                            <AnimatePresence>
-                                {!isCollapsed && (
-                                    <motion.span
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -10 }}
-                                        className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
-                                    >
-                                        JR Arcade <span className="text-emerald-500 font-medium">TMS</span>
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
+                            {!isCollapsed && (
+                                <span
+                                    className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
+                                >
+                                    JR Arcade <span className="text-emerald-500 font-medium">TMS</span>
+                                </span>
+                            )}
                         </div>
                         
                         {/* Close button for mobile */}
@@ -125,13 +101,9 @@ export default function Sidebar() {
                                 >
                                     <item.icon size={20} className={cn("flex-shrink-0", isActive ? "text-white" : "group-hover:text-emerald-400 transition-colors")} />
                                     {(!isCollapsed || isMobile) && (
-                                        <motion.span
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="font-medium text-sm"
-                                        >
+                                        <span className="font-medium text-sm">
                                             {item.label}
-                                        </motion.span>
+                                        </span>
                                     )}
                                 </div>
                             </Link>
@@ -153,7 +125,7 @@ export default function Sidebar() {
                         {(!isCollapsed || isMobile) && <span>Logout</span>}
                     </button>
                 </div>
-            </motion.aside>
+            </aside>
         </>
     )
 }

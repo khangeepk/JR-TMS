@@ -6,7 +6,6 @@ import WhatsAppActionButton from '@/components/WhatsAppActionButton'
 import SecurityInstallmentButton from '@/components/SecurityInstallmentButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
     Search,
     MoreVertical,
@@ -37,9 +36,7 @@ const SparklineRed = () => (
 // Sub-component for individual Stat Cards based on premium UI mockup
 function StatCard({ title, value, subValue, trendInfo, type = 'good' }: any) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <div
             className="bg-white premium-shadow rounded-2xl p-4 md:p-6 flex flex-col justify-between overflow-hidden relative group hover:-translate-y-1 transition-transform duration-300 min-h-[140px]"
         >
             <div className="flex justify-between items-start mb-2 relative z-10">
@@ -60,7 +57,7 @@ function StatCard({ title, value, subValue, trendInfo, type = 'good' }: any) {
             <div className="absolute bottom-0 left-0 right-0 pointer-events-none opacity-40 md:opacity-60 group-hover:opacity-100 transition-opacity">
                 {type === 'good' ? <SparklineGreen /> : <SparklineRed />}
             </div>
-        </motion.div>
+        </div>
     )
 }
 
@@ -168,9 +165,7 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+        <div
             className="space-y-8 pb-12"
         >
             {/* SaaS Metrics Header */}
@@ -248,9 +243,7 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
                 {/* Enhanced Tenant List Table based on Mockup */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                <div
                     className="xl:col-span-2 bg-white premium-shadow rounded-[2rem] overflow-hidden"
                 >
                     <div className="px-4 md:px-8 py-6 border-b border-neutral-100 flex items-center justify-between">
@@ -271,18 +264,14 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                                <AnimatePresence mode="popLayout">
                                     {filteredTenants.map((t: any, index: number) => {
                                         const rentPaid = optimisticPayments.some((p: any) => p.tenantId === t.id && p.type === 'RENT')
                                         const waterPaid = optimisticPayments.some((p: any) => p.tenantId === t.id && p.type === 'WATER')
                                         const isPaid = rentPaid && waterPaid
 
                                         return (
-                                            <motion.tr
-                                                layout
+                                            <tr
                                                 key={t.id}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
                                                 className={cn(
                                                     "hover:bg-neutral-50/50 dark:hover:bg-neutral-800/30 transition-colors group",
                                                     index % 2 === 0 ? "bg-white dark:bg-neutral-900/10" : "bg-neutral-50/10 dark:bg-neutral-800/5"
@@ -339,10 +328,9 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                                                         <WhatsAppActionButton tenantId={t.id} amount={t.monthlyRent + t.waterCharges} month={currentMonth} phone={t.phone} isPaid={isPaid} />
                                                     </div>
                                                 </td>
-                                            </motion.tr>
+                                            </tr>
                                         )
                                     })}
-                                </AnimatePresence>
                             </tbody>
                         </table>
 
@@ -401,17 +389,10 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                             })}
                         </div>
 
-                        {filteredTenants.length === 0 && (
-                            <div className="py-12 text-center text-slate-400 text-sm">
-                                No tenants match your search.
-                            </div>
-                        )}
                     </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                <div
                     className="bg-white premium-shadow p-6 md:p-8 rounded-[2rem] relative overflow-hidden h-fit"
                 >
                     <h2 className="text-xl font-bold mb-6 text-slate-800">Add New Tenant</h2>
@@ -451,8 +432,8 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                             Register Tenant
                         </button>
                     </form>
-                </motion.div>
+                </div>
             </div>
-        </motion.div>
+        </div>
     )
 }
