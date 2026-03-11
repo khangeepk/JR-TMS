@@ -7,10 +7,16 @@ export default async function DashboardPage() {
   try {
     const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })
 
-    const [tenants, paymentsThisMonth] = await Promise.all([
-      prisma.tenantProfile.findMany({ orderBy: { startDate: 'desc' } }),
-      prisma.paymentRecord.findMany({ where: { month: currentMonth } })
-    ])
+    // const [tenants, paymentsThisMonth] = await Promise.all([
+    //   prisma.tenantProfile.findMany({ orderBy: { startDate: 'desc' } }),
+    //   prisma.paymentRecord.findMany({ where: { month: currentMonth } })
+    // ])
+    
+    // Static Mock Data for isolating 500 error
+    const tenants = [
+      { id: '1', name: 'Static Test Tenant', offices: ['A1'], monthlyRent: 15000, waterCharges: 500, phone: '0000000000', startDate: new Date() }
+    ]
+    const paymentsThisMonth = [] as any
 
     return (
       <DashboardClient
