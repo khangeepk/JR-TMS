@@ -10,7 +10,6 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Building2,
     ShoppingCart,
     X
 } from 'lucide-react'
@@ -32,10 +31,7 @@ export default function Sidebar() {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const pathname = usePathname()
-    // const { isOpen, setIsOpen, toggle } = useMobileSidebar()
-    const isOpen = false
-    const setIsOpen = (val: boolean) => {}
-    const toggle = () => {}
+    const { isOpen, setIsOpen, toggle } = useMobileSidebar()
 
     // Handle hydration safely
     useEffect(() => {
@@ -47,38 +43,46 @@ export default function Sidebar() {
 
     // Close sidebar on route change on mobile
     useEffect(() => {
-        setIsOpen(false)
-    }, [pathname, setIsOpen])
+        if (isMobile) setIsOpen(false)
+    }, [pathname, isMobile, setIsOpen])
 
     return (
         <>
+            {/* Mobile backdrop overlay */}
+            {isMobile && isOpen && (
+                <div
+                    className="sidebar-overlay"
+                    onClick={() => setIsOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
             <aside
                 className={cn(
                     "fixed md:relative flex flex-col h-screen bg-[#1C2434] text-white transition-all duration-300 ease-in-out z-50 md:z-20",
-                    !isOpen && "hidden md:flex",
-                    isCollapsed ? "w-20" : "w-[260px]"
+                    isMobile ? (isOpen ? "flex translate-x-0" : "hidden -translate-x-full") : "flex",
+                    isCollapsed && !isMobile ? "w-20" : "w-[260px]"
                 )}
             >
                 {/* Brand Header */}
-                <div className="flex items-center h-20 px-6 overflow-hidden">
-                    <div className="flex items-center gap-3 w-full justify-between md:justify-start">
+                <div className="flex items-center h-20 px-6 overflow-hidden flex-shrink-0">
+                    <div className="flex items-center gap-3 w-full justify-between">
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0 flex items-center justify-center text-emerald-500">
                                 <span className="text-3xl font-black tracking-tighter">JR</span>
                             </div>
-                            {!isCollapsed && (
-                                <span
-                                    className="text-lg font-bold tracking-tight whitespace-nowrap text-white"
-                                >
+                            {(!isCollapsed || isMobile) && (
+                                <span className="text-lg font-bold tracking-tight whitespace-nowrap text-white">
                                     JR Arcade <span className="text-emerald-500 font-medium">TMS</span>
                                 </span>
                             )}
                         </div>
-                        
+
                         {/* Close button for mobile */}
-                        <button 
+                        <button
                             onClick={toggle}
-                            className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+                            className="md:hidden p-2 text-slate-400 hover:text-white transition-colors rounded-lg hover:bg-slate-800 flex-shrink-0"
+                            aria-label="Close sidebar"
                         >
                             <X size={20} />
                         </button>
@@ -112,7 +116,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer / Toggle */}
-                <div className="p-4 border-t border-slate-700/50">
+                <div className="p-4 border-t border-slate-700/50 flex-shrink-0">
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         className="hidden md:flex items-center gap-3 w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all font-medium text-sm"

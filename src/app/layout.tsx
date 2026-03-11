@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
     title: 'JR Arcade Management',
     description: 'Rent Management System for JR Arcade',
+    viewport: 'width=device-width, initial-scale=1.0',
 }
 
 export default function RootLayout({
@@ -17,7 +18,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${inter.className} bg-background text-foreground antialiased`}>
+            <body className={`${inter.className} bg-background text-foreground antialiased`} style={{ overflowX: 'hidden', maxWidth: '100vw' }}>
                 <Providers>
                     <ThemeProvider
                         attribute="class"

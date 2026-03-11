@@ -87,7 +87,7 @@ export default async function LedgerPage() {
             </div>
 
             {/* ── Monthly Income Breakdown Cards ── */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: 'Rent Expected', value: totalRentExpected, color: 'text-blue-500' },
                     { label: 'Rent Received', value: totalRentReceived, color: 'text-emerald-500' },
@@ -173,7 +173,7 @@ export default async function LedgerPage() {
                     <div className="px-6 py-5 border-b border-neutral-100">
                         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">Expense Breakdown (All Time)</h2>
                     </div>
-                    <div className="px-4 pb-4">
+                    <div className="overflow-x-auto px-4 pb-4">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b border-neutral-100">
