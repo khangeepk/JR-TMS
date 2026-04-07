@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import {
     Users, Building2, TrendingUp, TrendingDown, CheckCircle2, XCircle,
-    MessageCircle, Plus, LayoutDashboard, AlertTriangle, CreditCard
+    Plus, LayoutDashboard, AlertTriangle, CreditCard
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import WhatsAppActionButton from './WhatsAppActionButton'
 import SecurityInstallmentButton from './SecurityInstallmentButton'
 import WhatsAppConfigModal from './WhatsAppConfigModal'
+import AddTenantModal from './AddTenantModal'
 import { Webhook } from 'lucide-react'
 
 interface Tenant {
@@ -157,9 +158,10 @@ export default function DashboardClient({ initialTenants, initialPayments, curre
                         <Webhook size={14} className="group-hover:animate-spin-slow" />
                         Configure Global WhatsApp Settings
                     </button>
+                    <AddTenantModal />
                     <Link
                         href="/dashboard/tenants"
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.97] text-white text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 w-fit"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-[0.97] text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-sm w-fit"
                     >
                         <Users size={14} />
                         Manage Tenants

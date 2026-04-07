@@ -1,8 +1,9 @@
 import prisma from '@/lib/prisma'
 import Link from 'next/link'
-import { Users, Plus } from 'lucide-react'
+import { Users } from 'lucide-react'
 import EditTenantModal from '@/components/EditTenantModal'
 import DeleteTenantButton from '@/components/DeleteTenantButton'
+import AddTenantModal from '@/components/AddTenantModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,12 +22,7 @@ export default async function TenantsPage() {
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">{tenants.length} registered tenants · Edit and Delete from here</p>
                 </div>
-                <Link
-                    href="/dashboard"
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20"
-                >
-                    <Plus size={14} /> Add New Tenant
-                </Link>
+                <AddTenantModal />
             </div>
 
             <div className="bg-white premium-shadow rounded-[2rem] overflow-x-auto p-4 lg:p-6 text-slate-800">
