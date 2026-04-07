@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { addTenant } from '@/app/dashboard/actions'
 import { Plus, X, CheckCircle2, UserPlus, Building2, Phone, DollarSign, CalendarDays, Droplets, ShieldCheck, Users } from 'lucide-react'
@@ -42,12 +43,13 @@ export default function AddTenantModal() {
 
     return (
         <>
-            {/* Success Toast */}
-            {showSuccess && (
-                <div className="fixed bottom-6 right-6 z-[300] flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-emerald-600/30 animate-in slide-in-from-bottom-4 fade-in duration-300">
+            {/* Success Toast — portaled to body */}
+            {showSuccess && typeof document !== 'undefined' && createPortal(
+                <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-emerald-600/30 animate-in slide-in-from-bottom-4 fade-in duration-300">
                     <CheckCircle2 size={18} />
                     <span className="text-sm font-bold">New tenant added successfully!</span>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Trigger Button */}
@@ -60,10 +62,10 @@ export default function AddTenantModal() {
                 Add New Tenant
             </button>
 
-            {/* Modal Overlay */}
-            {isOpen && (
+            {/* Modal Overlay — portaled to body to escape overflow-hidden parents */}
+            {isOpen && typeof document !== 'undefined' && createPortal(
                 <div
-                    className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
                     onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}
                 >
@@ -254,7 +256,8 @@ export default function AddTenantModal() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     )

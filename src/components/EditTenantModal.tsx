@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { updateTenant } from '@/app/dashboard/actions'
 import { Pencil, X, CheckCircle2 } from 'lucide-react'
@@ -62,12 +63,13 @@ export default function EditTenantModal({ tenant }: { tenant: Tenant }) {
 
     return (
         <>
-            {/* Success Toast */}
-            {showSuccess && (
-                <div className="fixed bottom-6 right-6 z-[200] flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-emerald-600/30 animate-in slide-in-from-bottom-4 fade-in duration-300">
+            {/* Success Toast — portaled to body */}
+            {showSuccess && typeof document !== 'undefined' && createPortal(
+                <div className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl shadow-emerald-600/30 animate-in slide-in-from-bottom-4 fade-in duration-300">
                     <CheckCircle2 size={18} />
                     <span className="text-sm font-bold">Tenant details updated successfully!</span>
-                </div>
+                </div>,
+                document.body
             )}
 
             <button
@@ -78,8 +80,8 @@ export default function EditTenantModal({ tenant }: { tenant: Tenant }) {
                 Edit
             </button>
 
-            {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4">
+            {isOpen && typeof document !== 'undefined' && createPortal(
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-200">
                         <button
                             onClick={() => setIsOpen(false)}
@@ -224,7 +226,8 @@ export default function EditTenantModal({ tenant }: { tenant: Tenant }) {
                             </button>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     )

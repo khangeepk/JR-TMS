@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X, MessageCircle, Save, CheckCircle2, AlertTriangle, SwitchCamera, MessageSquare, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -68,8 +69,8 @@ export default function WhatsAppConfigModal({ isOpen, onClose }: Props) {
         }))
     }
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div 
                 className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
@@ -247,6 +248,7 @@ export default function WhatsAppConfigModal({ isOpen, onClose }: Props) {
                     <span className="text-sm font-bold">{toast}</span>
                 </div>
             )}
-        </div>
+        </div>,
+        document.body
     )
 }
