@@ -1,59 +1,47 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { sendWhatsAppMessage } from '@/lib/whatsapp'
+import { NextResponse } from "next/server";
+import { isAuthorizedCron } from "@/lib/reminders/cron-auth";
+import { runRentReminders } from "@/lib/reminders/service";
 
-const prisma = new PrismaClient()
+// Always run dynamically; never cache a cron response.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
+/**
+ * Monthly automated WhatsApp rent-due reminder job.
+ *
+ * Triggered by Vercel Cron (see vercel.json). Vercel automatically attaches
+ * `Authorization: Bearer $CRON_SECRET` when CRON_SECRET is configured. We fail
+ * closed if no secret is set, so this endpoint cannot be invoked anonymously.
+ *
+ * The job is idempotent: reminder rows are reserved via a unique DB constraint
+ * before any message is sent, so an accidental double-trigger or retry will not
+ * produce duplicate WhatsApp messages.
+ */
 export async function GET(request: Request) {
-    try {
-        const authHeader = request.headers.get('authorization')
+  const authHeader = request.headers.get("authorization");
+  const authorized = isAuthorizedCron(authHeader, {
+    cronSecret: process.env.CRON_SECRET,
+    authToken: process.env.AUTH_TOKEN,
+  });
 
-        // Check for standard Vercel CRON_SECRET or custom AUTH_TOKEN
-        if (
-            authHeader !== `Bearer ${process.env.CRON_SECRET}` &&
-            authHeader !== `Bearer ${process.env.AUTH_TOKEN}`
-        ) {
-            return new NextResponse('Unauthorized', { status: 401 })
-        }
+  if (!authorized) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
 
-        const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })
+  try {
+    // `force` lets an authorized manual call bypass the day-of-month guard.
+    const url = new URL(request.url);
+    const force = url.searchParams.get("force") === "1";
+    const dryRun = url.searchParams.get("dryRun") === "1";
 
-        const unpaidTenants = await prisma.tenantProfile.findMany({
-            where: {
-                status: 'unpaid'
-            }
-        })
+    const summary = await runRentReminders({ force, dryRun });
 
-        if (unpaidTenants.length === 0) {
-            return NextResponse.json({ message: 'No unpaid tenants found for reminder.' })
-        }
-
-        let successCount = 0
-        let failureCount = 0
-
-        for (const tenant of unpaidTenants) {
-            const officeStr = tenant.offices.join(', ')
-            const rentStr = `Rs. ${tenant.monthlyRent.toLocaleString()}`
-
-            const message = `Assalam-o-Alaikum ${tenant.name} Sahab,\n\nUmeed hai aap khairiyat se honge. JR Arcade ki taraf se ye aik soft reminder hai ke aapke Office/Shop ${officeStr} ka mahina ${currentMonth} ka rent ${rentStr} abhi tak pending hai.\n\nGuzarish hai ke jald az jald payment jama karwa dain takay ledger up-to-date rahay. Agar aap payment kar chuke hain, to baraye meherbani is message ko nazar-andaz (ignore) karein.\n\nShukriya,\nManagement - JR Arcade`
-
-            const result = await sendWhatsAppMessage(tenant.phone, message)
-            if (result.success) {
-                successCount++
-            } else {
-                failureCount++
-            }
-        }
-
-        return NextResponse.json({
-            message: 'Monthly reminders processed.',
-            totalUnpaid: unpaidTenants.length,
-            successes: successCount,
-            failures: failureCount
-        })
-
-    } catch (error: any) {
-        console.error('Reminder Cron Error:', error)
-        return new NextResponse('Internal Server Error', { status: 500 })
-    }
+    return NextResponse.json({ ok: true, summary });
+  } catch (error) {
+    console.error("[cron:reminders] failed:", error);
+    return NextResponse.json(
+      { ok: false, error: "Reminder job failed" },
+      { status: 500 }
+    );
+  }
 }

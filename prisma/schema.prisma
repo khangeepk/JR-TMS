@@ -23,8 +23,16 @@ model TenantProfile {
   totalSecurityAmount  Float                  @default(0)
   securityPaidSoFar    Float                  @default(0)
   securityStatus       String                 @default("Pending") // "Pending", "Partial", "Fully Paid"
+  // Notification / lifecycle fields (used by automated WhatsApp reminders)
+  isActive             Boolean                @default(true)
+  whatsappOptIn        Boolean                @default(true)
+  doNotContact         Boolean                @default(false)
+  // Optional explicit WhatsApp number. When null the primary `phone` is normalized instead.
+  // The original `phone` value is never overwritten by the reminder system.
+  whatsappNumber       String?
   payments             PaymentRecord[]
   securityInstallments SecurityInstallment[]
+  reminderLogs         RentReminderLog[]
 }
 
 model PaymentRecord {
@@ -74,4 +82,51 @@ model User {
   canAdd       Boolean  @default(false)
   canDelete    Boolean  @default(false)
   createdAt    DateTime @default(now())
+}
+
+/// Audit + idempotency log for outbound WhatsApp reminders.
+/// A row is created (status = "pending") BEFORE any provider call so that the
+/// unique constraint prevents duplicate reminders for the same billing period,
+/// even if the cron job runs twice concurrently.
+model RentReminderLog {
+  id                Int           @id @default(autoincrement())
+  tenantId          Int
+  tenant            TenantProfile @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // No separate lease model exists; leaseId mirrors tenantId so the composite
+  // unique key stays fully non-null and reliable in Postgres.
+  leaseId           Int
+  propertyId        Int           @default(1)
+  billingPeriod     String        // Canonical "YYYY-MM" in Asia/Karachi
+  reminderType      String        @default("RENT_DUE") // RENT_DUE | TEST
+  phoneNumberMasked String        @default("")
+  provider          String        @default("")
+  providerMessageId String?
+  templateName      String        @default("")
+  status            String        @default("pending") // pending | sent | failed | skipped
+  attemptCount      Int           @default(0)
+  errorCode         String?
+  errorMessage      String?
+  sentAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([tenantId, leaseId, billingPeriod, reminderType])
+  @@index([billingPeriod])
+  @@index([status])
+}
+
+/// Singleton (id = 1) holding automation configuration for rent reminders.
+/// Secrets (tokens, phone number id) are NEVER stored here — only in env vars.
+model NotificationSettings {
+  id                  Int      @id @default(1)
+  enabled             Boolean  @default(true)
+  reminderDay         Int      @default(5)
+  reminderHour        Int      @default(10)
+  timezone            String   @default("Asia/Karachi")
+  templateName        String   @default("rent_due_reminder")
+  templateLanguage    String   @default("en_US")
+  paymentInstructions String   @default("")
+  supportContact      String   @default("")
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
 }

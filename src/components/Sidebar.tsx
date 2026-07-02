@@ -11,6 +11,7 @@ import {
     ChevronRight,
     LogOut,
     ShoppingCart,
+    MessageCircle,
     X
 } from 'lucide-react'
 import Link from 'next/link'
@@ -24,6 +25,7 @@ const menuItems = [
     { icon: Receipt, label: 'Ledger', href: '/dashboard/ledger' },
     { icon: ShoppingCart, label: 'Expenses', href: '/dashboard/expenses' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics' },
+    { icon: MessageCircle, label: 'WhatsApp Reminders', href: '/dashboard/notifications' },
     { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
 ]
 
